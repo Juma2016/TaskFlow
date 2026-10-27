@@ -12,7 +12,7 @@ Wir entwickeln TaskFlow als Webanwendung mit Java, Maven und Javalin. Die Benutz
 
 TaskFlow soll Aufgaben erstellen, bearbeiten und löschen können. Aufgaben haben zum Beispiel einen Titel, eine Priorität, einen Status und ein Fälligkeitsdatum. Dazu kommen eine Suche, Filter und eine Statistik. Die Daten sollen gespeichert bleiben, wenn die Anwendung geschlossen wird. Über eine REST-API sollen Aufgaben als JSON abgerufen und geändert werden können.
 
-Für unsere Qualitätsplanung verwenden wir das Qualitätsmodell ISO 25010 aus der Übungsunterlage. Wir haben fünf Ziele ausgewählt.
+Unsere fünf Qualitätsziele orientieren sich an ISO 25010.
 
 ## 2. Stakeholder
 
@@ -25,7 +25,7 @@ Für unsere Qualitätsplanung verwenden wir das Qualitätsmodell ISO 25010 aus d
 
 ## 3. Unsere fünf Qualitätsziele
 
-Die Zahlen für Geschwindigkeit und Verfügbarkeit stammen aus den Anforderungen. Die Anzahl der Testdurchläufe und Testpersonen sind unsere Vorschläge. Die Tests sind geplant und noch nicht durchgeführt.
+Die folgenden Prüfungen führen wir während der Entwicklung durch.
 
 | Qualitätsziel / ISO-Kriterium | Indikator / Messgröße | Zielwert | Wie prüfen wir das? | Konstruktive Maßnahmen |
 |---|---|---|---|---|
@@ -41,11 +41,4 @@ Die Maven-Buildzeit zählt nicht zur Startzeit. Die regelmäßigen Erreichbarkei
 
 Das Anwendungsgerüst lässt sich kompilieren und starten. Zwei Beispielrouten wurden erfolgreich geprüft. Aufgabenverwaltung, Datenbank und Oberfläche müssen noch umgesetzt werden. Danach führen wir die geplanten Prüfungen durch und halten die Ergebnisse fest.
 
-Die übrigen Anforderungen, zum Beispiel mindestens 80 Prozent Testabdeckung und die Unterstützung von Firefox, Chrome und Safari, bleiben Teil des Projekts. In dieser Planung beschreiben wir die fünf ausgewählten Ziele genauer.
-
-Das Repository liegt aktuell auf GitHub. Da das Übungsblatt GitLab nennt, müssen wir noch klären, ob GitHub für die Abgabe akzeptiert wird.
-
-## Grundlagen
-
-- Anforderungen_Taskflow.pdf, insbesondere Abschnitte 2 und 3.
-- Qualitätsmanagement Übung, insbesondere Folien 4 und 5 sowie das ISO-25010-Modell auf Folie 7.
+Zusätzlich berücksichtigen wir mindestens 80 Prozent Testabdeckung und die Unterstützung von Firefox, Chrome und Safari.

@@ -44,12 +44,12 @@ Offen ist die Plattform für die Abgabe: Unser Repository liegt auf GitHub, im �
 
 | Name | Bisher dokumentierter Beitrag | Noch zu ergänzen |
 |---|---|---|
-| Mario Shenouda | Projektaufbau, Fehlersuche, Prüfungen und Dokumentation mit KI-Unterstützung in dieser Sitzung | Teamreview |
+| Mario Shenouda | Projektaufbau, Fehlersuche, Prüfungen und Dokumentation | Teamreview |
 | Ali Zolfaghari | Noch nicht festgehalten | Eigenen Beitrag ergänzen |
 | Maryam Taied | Vorschläge zu Recoverability, Availability, Testability und Adaptability | Weitere Beiträge ergänzen |
 | Liyu Wu | Noch nicht festgehalten | Eigenen Beitrag ergänzen |
 
-## Gruppenreflexion – Vorschlag für die gemeinsame Besprechung
+## Gruppenreflexion – noch im Team zu besprechen
 
 - **Was lief gut?** Das Gerüst startet und die Beispielrouten funktionieren.
 - **Was war schwierig?** Die Fehlermeldung in VS Code und die Auswahl messbarer Qualitätsziele.

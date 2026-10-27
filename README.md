@@ -58,4 +58,4 @@ Geplant: getrennte HTTP-, Geschäftslogik- und Datenzugriffsschichten; SQLite, J
 
 Aktuelles Repository: https://github.com/Juma2016/TaskFlow . Das Übungsblatt verlangt GitLab. Noch ist kein GitLab-Ziel bekannt und keine Zustimmung zur Plattformabweichung dokumentiert. Bestehende Historie und GitHub-origin wurden erhalten. Ein späteres GitLab-Ziel kann als zusätzlicher Remote ergänzt werden.
 
-Teambeiträge, Rollen und Reflexion sind gemeinsam zu bestätigen. Der Qualitätsplan enthält Annahmen und offene Entscheidungen ausdrücklich; Qualitätsziele werden nicht als bereits erreicht ausgegeben.
+Die Aufteilung der weiteren Arbeiten besprechen wir im Team.
