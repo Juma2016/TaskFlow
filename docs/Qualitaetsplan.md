@@ -27,60 +27,15 @@ Für unsere Qualitätsplanung verwenden wir das Qualitätsmodell ISO 25010 aus d
 
 Die Zahlen für Geschwindigkeit und Verfügbarkeit stammen aus den Anforderungen. Die Anzahl der Testdurchläufe und Testpersonen sind unsere Vorschläge. Die Tests sind geplant und noch nicht durchgeführt.
 
-### Q1 – Fachliche Korrektheit
+| Qualitätsziel / ISO-Kriterium | Indikator / Messgröße | Zielwert | Wie prüfen wir das? | Konstruktive Maßnahmen |
+|---|---|---|---|---|
+| **Q1 – Fachliche Korrektheit** / Functional suitability: Functional correctness | Bestandene Pflicht-Testfälle (%); kritische Fehler | 100 % bestanden; keine bekannten kritischen Fehler | Erstellen, Bearbeiten, Löschen und Filtern testen; auch falsche Eingaben prüfen | Pflichtfelder prüfen; feste Status- und Prioritätswerte; ID und Erstellungszeit schützen |
+| **Q2 – Geschwindigkeit** / Performance efficiency: Time behaviour, Capacity | Startzeit (s); Filterzeit (ms) bei 100.000 Aufgaben | Start ≤ 2 s; Filter ≤ 100 ms | Fünf Starts und zehn Durchläufe je Filter auf demselben Rechner messen | Datenbankindizes verwenden; nur benötigte Daten laden |
+| **Q3 – Wiederherstellbarkeit** / Reliability: Recoverability | Verlorene bestätigte Änderungen nach einem Neustart (Anzahl) | 0 verlorene bestätigte Änderungen in den Tests | Aufgaben speichern, Prozess unerwartet beenden und neu starten; fünfmal wiederholen und Daten vergleichen | SQLite-Transaktionen; JSON-Backups |
+| **Q4 – Verfügbarkeit** / Reliability: Availability | Erfolgreiche Erreichbarkeitsprüfungen (%); Ausfallzeit (min) | Über 99 %; bei 30 Tagen weniger als 432 min Ausfall | Nach Bereitstellung auf dem Server jede Minute prüfen; Ergebnisse einen Monat lang erfassen | Server überwachen; Fehler protokollieren; automatischer Neustart |
+| **Q5 – Einfache Bedienung** / Interaction capability: Operability, User error protection | Ohne Hilfe erledigte Versuche (Anzahl); Daten nach Löschabbruch | Mindestens 14 von 15 Versuchen ohne Hilfe; kein Datenverlust beim Abbrechen | Fünf Personen erstellen, bearbeiten und filtern je eine Aufgabe; Löschen, Abbrechen und Fehlermeldungen zusätzlich prüfen | Klare Beschriftungen; verständliche Fehlermeldungen; Bestätigung vor dem Löschen |
 
-**ISO-Kriterium:** Functional suitability – Functional correctness
-
-Die Aufgabenverwaltung soll die erwarteten Ergebnisse liefern.
-
-- **Indikator / Messgröße:** Anteil der bestandenen Testfälle in Prozent und Anzahl kritischer Fehler.
-- **Zielwert:** Alle festgelegten Pflicht-Testfälle bestehen; keine bekannten kritischen Fehler.
-- **Prüfung:** Wir testen zum Beispiel das Erstellen, Bearbeiten, Löschen und Filtern von Aufgaben. Dabei prüfen wir auch falsche Eingaben.
-- **Konstruktive Maßnahmen:** Pflichtfelder prüfen, feste Werte für Priorität und Status verwenden und ID sowie Erstellungszeit vor Änderungen schützen.
-
-### Q2 – Geschwindigkeit
-
-**ISO-Kriterium:** Performance efficiency – Time behaviour und Capacity
-
-TaskFlow soll auch mit vielen Aufgaben schnell reagieren.
-
-- **Indikator / Messgröße:** Startzeit in Sekunden und Filterzeit in Millisekunden bei 100.000 gespeicherten Aufgaben.
-- **Zielwert:** Start höchstens 2 Sekunden, Filter höchstens 100 Millisekunden.
-- **Prüfung:** Wir messen fünf Starts und zehn Durchläufe pro Filter auf demselben Rechner. Wir notieren die Zeiten und prüfen, ob ein Wert die Grenze überschreitet. Die Maven-Buildzeit zählt nicht zur Startzeit.
-- **Konstruktive Maßnahmen:** Passende Datenbankindizes anlegen und nur die benötigten Daten laden.
-
-### Q3 – Wiederherstellbarkeit
-
-**ISO-Kriterium:** Reliability – Recoverability
-
-Nach einem Absturz sollen bereits gespeicherte Aufgaben noch vorhanden sein.
-
-- **Indikator / Messgröße:** Anzahl verlorener, bereits als gespeichert bestätigter Änderungen nach einem Neustart.
-- **Zielwert:** Keine verlorenen bestätigten Änderungen in unseren Tests.
-- **Prüfung:** Wir speichern und ändern Aufgaben, beenden den Prozess unerwartet und starten die Anwendung neu. Wir wiederholen das fünfmal und vergleichen die Daten.
-- **Konstruktive Maßnahmen:** SQLite-Transaktionen verwenden und eine Backup-Funktion mit JSON-Dateien vorsehen.
-
-### Q4 – Verfügbarkeit
-
-**ISO-Kriterium:** Reliability – Availability
-
-Die Benutzer sollen TaskFlow erreichen können, wenn sie ihre Aufgaben verwalten möchten.
-
-- **Indikator / Messgröße:** Anteil erfolgreicher Erreichbarkeitsprüfungen in Prozent und dokumentierte Ausfallzeit.
-- **Zielwert:** Verfügbarkeit über 99 Prozent.
-- **Prüfung:** Nach dem Serverbetrieb prüfen wir jede Minute, ob die Anwendung antwortet, und werten die Ergebnisse über einen Monat aus. Bei 30 Tagen entspricht die Vorgabe weniger als 432 Minuten Ausfallzeit. Die Minutenprüfungen liefern eine Schätzung.
-- **Konstruktive Maßnahmen:** Server überwachen, Fehler protokollieren und einen automatischen Neustart bei einem Prozessausfall einrichten.
-
-### Q5 – Einfache Bedienung
-
-**ISO-Kriterium:** Interaction capability – Operability und User error protection
-
-Benutzer sollen die wichtigsten Funktionen ohne Erklärung bedienen können.
-
-- **Indikator / Messgröße:** Anzahl der ohne Hilfe erledigten Aufgaben und Ergebnis beim Abbrechen einer Löschung.
-- **Zielwert:** Mindestens 14 von 15 Versuchen gelingen ohne Hilfe. Beim Abbrechen einer Löschung bleiben die Daten erhalten. Das sind unsere vorgeschlagenen Zielwerte.
-- **Prüfung:** Fünf Personen erstellen, bearbeiten und filtern jeweils eine Aufgabe. Zusätzlich testen wir das Löschen und Abbrechen sowie Fehlermeldungen bei falschen Eingaben.
-- **Konstruktive Maßnahmen:** Felder klar beschriften, verständliche Fehlermeldungen anzeigen und vor dem Löschen eine Bestätigung verlangen.
+Die Maven-Buildzeit zählt nicht zur Startzeit. Die regelmäßigen Erreichbarkeitsprüfungen schätzen die Verfügbarkeit. Für die Messungen halten wir Rechner, Softwareversion und Testdaten fest.
 
 ## 4. Stand und nächste Schritte
 
