@@ -7,58 +7,61 @@
 | **Datum** | 27.10.2026 |
 | **Thema** | Qualitätsplanung und Projektaufbau |
 
-## Durchgeführte Arbeiten
+## Was haben wir gemacht?
 
-- Anforderungen gelesen und eine Webanwendung mit Java, Maven und Javalin ausgewählt.
-- Das Projekt eingerichtet und auf GitHub hochgeladen.
-- Stakeholder und fünf Qualitätsziele festgelegt: Korrektheit, Geschwindigkeit, Wiederherstellbarkeit, Verfügbarkeit und Bedienbarkeit.
-- Für jedes Ziel Messgrößen, Zielwerte, Prüfungen und Maßnahmen beschrieben.
-- Eine Startanleitung in der README ergänzt.
+- Wir haben die Anforderungen gelesen und uns für eine Webanwendung mit Java, Maven und Javalin entschieden.
+- Wir haben das Projekt eingerichtet und auf GitHub hochgeladen.
+- Wir haben die Stakeholder und fünf Qualitätsziele beschrieben: Korrektheit, Geschwindigkeit, Wiederherstellbarkeit, Verfügbarkeit und Bedienbarkeit.
+- Zu jedem Ziel haben wir Messgrößen, Zielwerte, Prüfungen und Maßnahmen festgelegt.
+- Wir haben die geplanten Tests auf einen ersten Lauf mit 10.000 Aufgaben und einen lokalen Stabilitätstest über 60 Minuten angepasst. Die ursprünglichen Vorgaben haben wir im Plan festgehalten.
+- Wir haben die Startanleitung in der README ergänzt.
 
-## Qualitätssicherung
+## Wie haben wir die Qualität gesichert?
 
-| Art | Durchgeführte Maßnahmen |
+| Art | Was haben wir gemacht? |
 |---|---|
-| Konstruktiv | Java-Zielversion 17 und die Startklasse in Maven eingestellt; generierte Dateien über .gitignore ausgeschlossen. |
-| Analytisch | Quellcode und Fehlermeldungen geprüft; Projekt kompiliert und beide Beispielrouten aufgerufen. |
+| Konstruktiv | Wir haben Java 17 als Zielversion und die Startklasse in Maven eingestellt. Über .gitignore schließen wir erzeugte Dateien aus. |
+| Analytisch | Wir haben den Quellcode und die Fehlermeldungen geprüft. Danach haben wir das Projekt kompiliert und beide Beispielrouten aufgerufen. |
 
-## Tests
+## Was haben wir getestet?
 
-| Test | Durchführung | Ergebnis |
+| Test | Wie sind wir vorgegangen? | Ergebnis |
 |---|---|---|
-| Kompilierung | mvn clean compile mit JDK 21, Zielversion Java 17 | Erfolgreich: BUILD SUCCESS |
-| Start der Anwendung | mvn compile exec:java | Server startet auf Port 7070 |
-| Startseite | GET / | HTTP 200, Begrüßung wird angezeigt |
-| Aufgabenroute | GET /api/tasks | HTTP 200, Beispieltext wird angezeigt |
+| Kompilieren | Wir haben mvn clean compile mit JDK 21 und Zielversion Java 17 ausgeführt. | BUILD SUCCESS |
+| Anwendung starten | Wir haben mvn compile exec:java ausgeführt. | Der Server startet auf Port 7070. |
+| Startseite | Wir haben GET / aufgerufen. | HTTP 200 und die erwartete Begrüßung. |
+| Aufgabenroute | Wir haben GET /api/tasks aufgerufen. | HTTP 200 und der erwartete Beispieltext. |
 
-Die Aufgabenroute liefert bisher nur einen Beispieltext. Aufgabenverwaltung und Datenbank sind noch nicht umgesetzt. Die dazugehörigen Tests folgen später.
+Die Aufgabenroute gibt aktuell nur einen Beispieltext zurück. Später kommt hier JSON zurück. Aufgabenverwaltung und Datenbank fehlen noch. Deshalb haben wir die Tests mit 10.000 Aufgaben und den 60-Minuten-Lauf noch nicht ausgeführt. Auch die Testabdeckung haben wir noch nicht gemessen.
 
-## Probleme und Lösungen
+## Welche Probleme gab es?
 
-| Problem | Lösung / Stand |
+| Problem | Wie haben wir es gelöst oder was ist noch offen? |
 |---|---|
-| VS Code hat einen Fehler bei der Paketstruktur angezeigt. | Den TaskFlow-Ordner direkt geöffnet und das Maven-Projekt importiert. |
-| Unklar, wie wir die Qualitätsziele prüfen können. | Zu jedem Ziel eine Messgröße und eine konkrete Prüfung festgelegt. |
-| Das Repository liegt auf GitHub, die Aufgabe nennt GitLab. | Noch klären, ob GitHub für die Abgabe akzeptiert wird. |
+| VS Code hat einen Fehler bei der Paketstruktur angezeigt. | Wir haben den TaskFlow-Ordner direkt geöffnet. Danach hat VS Code das Maven-Projekt geladen. |
+| Es war unklar, wie wir die Qualitätsziele prüfen können. | Wir haben zu jedem Ziel eine Messgröße, einen Zielwert und einen konkreten Test ergänzt. |
+| Unser erster Geschwindigkeitstest nutzt weniger Daten als gefordert. | Wir beginnen mit 10.000 Aufgaben. Die geforderten 100.000 müssen wir später ebenfalls prüfen oder mit der Lehrperson abklären. |
+| Wir betreiben noch keinen Server über einen ganzen Monat. | Wir planen zunächst einen lokalen Lauf über 60 Minuten. Ob das für die Abgabe reicht, klären wir noch ab. |
+| Wir nutzen GitHub, die Aufgabe nennt GitLab. | Wir arbeiten im bestehenden Repo weiter und klären noch ab, ob wir für die Abgabe wechseln müssen. |
 
-## Arbeitsaufteilung
+## Wer hat woran gearbeitet?
 
-| Name | Durchgeführte Arbeiten | Bemerkungen |
+| Name | Bisherige Arbeiten | Noch offen |
 |---|---|---|
 | Mario Shenouda | Projektaufbau, Fehlersuche, Tests und Dokumentation | |
-| Ali Zolfaghari | — | Beitrag noch einzutragen |
+| Ali Zolfaghari | — | Beitrag noch eintragen |
 | Maryam Taied | Vorschläge zu Recoverability, Availability, Testability und Adaptability | |
-| Liyu Wu | — | Beitrag noch einzutragen |
+| Liyu Wu | — | Beitrag noch eintragen |
 
-## Reflexion
+## Was nehmen wir aus der Einheit mit?
 
-| Frage | Bisherige Beobachtung |
+| Frage | Unsere bisherigen Beobachtungen |
 |---|---|
 | Was lief gut? | Das Projekt startet und beide Beispielrouten funktionieren. |
-| Was war schwierig? | Die Fehlermeldung in VS Code und die Formulierung messbarer Qualitätsziele. |
-| Was haben wir gelernt? | Ein Qualitätsziel braucht einen konkreten Zielwert und eine passende Prüfung. |
-| Was verbessern wir beim nächsten Mal? | Die Aufgaben im Team früher verteilen und die Ergebnisse gemeinsam prüfen. |
+| Was war schwierig? | Die Fehlermeldung in VS Code und die Frage, wie wir Qualitätsziele messbar machen. |
+| Was haben wir gelernt? | Ein Qualitätsziel braucht einen konkreten Zielwert und einen Test, den wir auch durchführen können. |
+| Was machen wir nächstes Mal besser? | Wir verteilen die Aufgaben früher und schauen die Ergebnisse gemeinsam durch. |
 
-## Nächste Schritte
+## Was kommt als Nächstes?
 
-Das Aufgabenmodell erstellen und die Eingabeprüfung umsetzen. Danach folgen SQLite und die API für die Aufgabenverwaltung.
+Wir erstellen das Aufgabenmodell und prüfen die Eingaben. Danach bauen wir SQLite und die API für die Aufgabenverwaltung ein. Parallel ergänzen wir automatische Tests.
