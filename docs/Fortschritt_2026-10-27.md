@@ -51,7 +51,7 @@ Die Aufgabenroute gibt aktuell nur einen Beispieltext zurück. Später kommt hie
 | Mario Shenouda | Projektaufbau, Fehlersuche, Tests und Dokumentation | |
 | Ali Zolfaghari | — | Beitrag noch eintragen |
 | Maryam Taied | Vorschläge zu Recoverability, Availability, Testability und Adaptability | |
-| Liyu Wu | — | Beitrag noch eintragen |
+| Liyu Wu | Vorschläge zum Technologie-Stack |  |
 
 ## Was nehmen wir aus der Einheit mit?
 
