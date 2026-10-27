@@ -48,7 +48,7 @@ Die Aufgabenroute liefert bisher nur einen Beispieltext. Aufgabenverwaltung und 
 | Mario Shenouda | Projektaufbau, Fehlersuche, Tests und Dokumentation | |
 | Ali Zolfaghari | — | Beitrag noch einzutragen |
 | Maryam Taied | Vorschläge zu Recoverability, Availability, Testability und Adaptability | |
-| Liyu Wu | — | Beitrag noch einzutragen |
+| Liyu Wu | Vorschläge zum Technologie-Stack |  |
 
 ## Reflexion
 
