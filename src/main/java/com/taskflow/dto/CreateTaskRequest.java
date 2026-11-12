@@ -2,6 +2,7 @@ package com.taskflow.dto;
 
 import com.taskflow.enums.Priority;
 import java.time.LocalDate;
+import com.taskflow.enums.TaskStatus;
 
 public class CreateTaskRequest {
 
@@ -9,6 +10,7 @@ public class CreateTaskRequest {
     private String description;
     private Priority priority;
     private LocalDate dueDate;
+    private TaskStatus status;
 
     public CreateTaskRequest() {
     }
@@ -43,5 +45,13 @@ public class CreateTaskRequest {
 
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
+    }
+
+    public TaskStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TaskStatus status) {
+        this.status = status;
     }
 }

@@ -2,6 +2,7 @@
 package com.taskflow.api;
 
 import com.taskflow.dto.CreateTaskRequest;
+import com.taskflow.enums.TaskStatus;
 import com.taskflow.service.TaskService;
 import com.taskflow.validation.TaskValidator;
 import io.javalin.Javalin;
@@ -75,6 +76,39 @@ class TaskApiTest {
 
                 ctx.status(201);
                 ctx.json(task);
+            });
+
+            // Update an existing task.
+            config.routes.put("/api/tasks/{id}", ctx -> {
+
+                long id = Long.parseLong(ctx.pathParam("id"));
+
+                CreateTaskRequest request =
+                        ctx.bodyAsClass(CreateTaskRequest.class);
+
+                TaskValidator.validate(request);
+
+                TaskStatus status = request.getStatus() != null
+                        ? request.getStatus()
+                        : TaskStatus.OFFEN;
+
+                var updatedTask = taskService.updateTask(
+                        id,
+                        request.getTitle(),
+                        request.getDescription(),
+                        request.getPriority(),
+                        request.getDueDate(),
+                        status
+                );
+
+                if (updatedTask.isPresent()) {
+                    ctx.json(updatedTask.get());
+                } else {
+                    ctx.status(404);
+                    ctx.json(java.util.Map.of(
+                            "error", "Task not found."
+                    ));
+                }
             });
         });
 
@@ -181,5 +215,52 @@ class TaskApiTest {
 
         assertEquals(404, response.statusCode());
         assertTrue(response.body().contains("Task not found."));
+    }
+
+    @Test
+    void shouldUpdateTaskSuccessfully() throws Exception {
+
+        String createJson = """
+            {
+                "title": "Old Task",
+                "description": "Old Description",
+                "priority": "NIEDRIG"
+            }
+            """;
+
+        HttpRequest createRequest = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/tasks"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(createJson))
+                .build();
+
+        client.send(
+                createRequest,
+                HttpResponse.BodyHandlers.ofString()
+        );
+
+        String updateJson = """
+            {
+                "title": "Updated Task",
+                "description": "Updated Description",
+                "priority": "HOCH",
+                "status": "IN_BEARBEITUNG"
+            }
+            """;
+
+        HttpRequest updateRequest = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/tasks/1"))
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(updateJson))
+                .build();
+
+        HttpResponse<String> response = client.send(
+                updateRequest,
+                HttpResponse.BodyHandlers.ofString()
+        );
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("Updated Task"));
+        assertTrue(response.body().contains("IN_BEARBEITUNG"));
     }
 }

@@ -1,6 +1,7 @@
 
 package com.taskflow;
 
+import com.taskflow.enums.TaskStatus;
 import com.taskflow.model.Task;
 import com.taskflow.service.TaskService;
 import com.taskflow.dto.CreateTaskRequest;
@@ -27,13 +28,11 @@ public class Main {
                     });
 
             // Welcome endpoint.
-            // Returns a simple message to check whether the server is running.
             config.routes.get("/", ctx -> {
                 ctx.result("Willkommen bei TaskFlow!");
             });
 
             // Get all tasks.
-            // Returns the current task list as JSON.
             config.routes.get("/api/tasks", ctx -> {
                 ctx.json(taskService.getAllTasks());
             });
@@ -56,17 +55,13 @@ public class Main {
             });
 
             // Create a new task.
-            // Reads the JSON request, validates it and creates a task.
             config.routes.post("/api/tasks", ctx -> {
 
-                // Convert the incoming JSON into a CreateTaskRequest object.
                 CreateTaskRequest request =
                         ctx.bodyAsClass(CreateTaskRequest.class);
 
-                // Validate the task data before creating the task.
                 TaskValidator.validate(request);
 
-                // Create the task using the TaskService.
                 Task task = taskService.createTask(
                         request.getTitle(),
                         request.getDescription(),
@@ -74,9 +69,42 @@ public class Main {
                         request.getDueDate()
                 );
 
-                // Return HTTP 201 Created with the new task as JSON.
+                // Return HTTP 201 Created.
                 ctx.status(201);
                 ctx.json(task);
+            });
+
+            // Update an existing task.
+            config.routes.put("/api/tasks/{id}", ctx -> {
+
+                long id = Long.parseLong(ctx.pathParam("id"));
+
+                CreateTaskRequest request =
+                        ctx.bodyAsClass(CreateTaskRequest.class);
+
+                TaskValidator.validate(request);
+
+                TaskStatus status = request.getStatus() != null
+                        ? request.getStatus()
+                        : TaskStatus.OFFEN;
+
+                var updatedTask = taskService.updateTask(
+                        id,
+                        request.getTitle(),
+                        request.getDescription(),
+                        request.getPriority(),
+                        request.getDueDate(),
+                        status
+                );
+
+                if (updatedTask.isPresent()) {
+                    ctx.json(updatedTask.get());
+                } else {
+                    ctx.status(404);
+                    ctx.json(java.util.Map.of(
+                            "error", "Task not found."
+                    ));
+                }
             });
 
         });
