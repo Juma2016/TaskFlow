@@ -59,3 +59,21 @@ Geplant: getrennte HTTP-, Geschäftslogik- und Datenzugriffsschichten; SQLite, J
 Aktuelles Repository: https://github.com/Juma2016/TaskFlow . Das Übungsblatt verlangt GitLab. Noch ist kein GitLab-Ziel bekannt und keine Zustimmung zur Plattformabweichung dokumentiert. Bestehende Historie und GitHub-origin wurden erhalten. Ein späteres GitLab-Ziel kann als zusätzlicher Remote ergänzt werden.
 
 Die Aufteilung der weiteren Arbeiten besprechen wir im Team.
+
+## Projektstruktur: Datenbank- und Modellschicht
+
+Die Persistenzschicht und die zugehörigen Datenmodelle von **TaskFlow** sind wie folgt strukturiert:
+
+| Paket / Datei | Zweck / Beschreibung |
+| :--- | :--- |
+| **`com.taskflow.db`** | **Datenbank- und Persistenzschicht (Data Logic)** |
+| `DatabaseManager.java` | Verwaltet SQLite-Verbindungen, aktiviert `WAL`-Modus, Foreign Keys sowie Busy-Timeout und initialisiert Tabellen und Indizes über `schema.sql`. |
+| `TaskRepository.java` | Definiert die Schnittstelle (Interface) für CRUD-Operationen, Filterabfragen, Statistiken und JSON-Backups zur Entkopplung von Geschäftslogik und Datenbank. |
+| `SqliteTaskRepository.java` | Implementiert `TaskRepository` mit JDBC (`PreparedStatement`), Transaktionssicherheit, dynamischen SQL-Filtern, Historien-Tracking und atomarem JSON-Backup/Restore. |
+| **`com.taskflow.model`** | **Datenmodelle und DTOs (Domain Models)** |
+| `Task.java` | Repräsentiert eine einzelne Aufgabe inklusive aller Attribute (ID, Titel, Beschreibung, Priorität, Status, Fälligkeits- und Erstellungsdatum) sowie der Änderungshistorie. |
+| `TaskStatusHistory.java` | Modelliert einen einzelnen Statuswechsel einer Aufgabe (alter Status, neuer Status, Zeitstempel) für die Nachvollziehbarkeit in der Detailansicht. |
+| `Priority.java` | Enum zur Definition der erlaubten Prioritätsstufen (`NIEDRIG`, `MITTEL`, `HOCH`). |
+| `TaskStatus.java` | Enum zur Definition der möglichen Aufgabenstatus (`OFFEN`, `IN_BEARBEITUNG`, `ABGESCHLOSSEN`). |
+| `TaskFilterCriteria.java` | Kapselt Such- und Filterkriterien (Status, Priorität, Fälligkeitszeitraum wie überfällig/heute/diese Woche, Suchbegriff) für Datenbankabfragen. |
+| `TaskStatistics.java` | Datentransferobjekt (DTO) zur Bündelung der aggregierten Aufgabenstatistiken (Anzahl pro Status, überfällige Aufgaben, Gesamtanzahl). |
