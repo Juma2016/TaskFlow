@@ -43,6 +43,11 @@ class TaskApiTest {
                 ctx.json(taskService.getAllTasks());
             });
 
+            // Get task statistics.
+            config.routes.get("/api/tasks/stats", ctx -> {
+                ctx.json(taskService.getTaskStats());
+            });
+
             // Get a task by its ID.
             config.routes.get("/api/tasks/{id}", ctx -> {
 
@@ -343,5 +348,42 @@ class TaskApiTest {
 
         assertEquals(404, response.statusCode());
         assertTrue(response.body().contains("Task not found."));
+    }
+
+    @Test
+    void shouldReturnTaskStatistics() throws Exception {
+
+        String json = """
+            {
+                "title": "Stats Test Task",
+                "description": "Testing statistics",
+                "priority": "HOCH"
+            }
+            """;
+
+        HttpRequest createRequest = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/tasks"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+
+        client.send(
+                createRequest,
+                HttpResponse.BodyHandlers.ofString()
+        );
+
+        HttpRequest statsRequest = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/tasks/stats"))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(
+                statsRequest,
+                HttpResponse.BodyHandlers.ofString()
+        );
+
+        assertEquals(200, response.statusCode());
+        assertTrue(response.body().contains("\"total\":1"));
+        assertTrue(response.body().contains("\"OFFEN\":1"));
     }
 }

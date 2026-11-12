@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -110,4 +111,33 @@ public class TaskService {
         return tasks.removeIf(task -> task.getId() == id);
     }
 
+    /**
+     * Returns statistics about all tasks.
+     *
+     * @return a map containing the total number of tasks
+     *         and the number of tasks for each status
+     */
+    public Map<String, Long> getTaskStats() {
+
+        long total = tasks.size();
+
+        long open = tasks.stream()
+                .filter(task -> task.getStatus() == TaskStatus.OFFEN)
+                .count();
+
+        long inProgress = tasks.stream()
+                .filter(task -> task.getStatus() == TaskStatus.IN_BEARBEITUNG)
+                .count();
+
+        long completed = tasks.stream()
+                .filter(task -> task.getStatus() == TaskStatus.ABGESCHLOSSEN)
+                .count();
+
+        return Map.of(
+                "total", total,
+                "OFFEN", open,
+                "IN_BEARBEITUNG", inProgress,
+                "ABGESCHLOSSEN", completed
+        );
+    }
 }

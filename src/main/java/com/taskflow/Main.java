@@ -37,6 +37,11 @@ public class Main {
                 ctx.json(taskService.getAllTasks());
             });
 
+            // Get task statistics.
+            config.routes.get("/api/tasks/stats", ctx -> {
+                ctx.json(taskService.getTaskStats());
+            });
+
             // Get a task by its ID.
             config.routes.get("/api/tasks/{id}", ctx -> {
 

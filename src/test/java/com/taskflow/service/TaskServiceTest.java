@@ -175,4 +175,64 @@ class TaskServiceTest {
         assertFalse(result);
     }
 
+    @Test
+    void shouldReturnCorrectTaskStats() {
+
+        taskService.createTask(
+                "Open Task",
+                "Test open status",
+                Priority.NIEDRIG,
+                null
+        );
+
+        Task task2 = taskService.createTask(
+                "In Progress Task",
+                "Test in progress status",
+                Priority.MITTEL,
+                null
+        );
+
+        Task task3 = taskService.createTask(
+                "Completed Task",
+                "Test completed status",
+                Priority.HOCH,
+                null
+        );
+
+        taskService.updateTask(
+                task2.getId(),
+                task2.getTitle(),
+                task2.getDescription(),
+                task2.getPriority(),
+                task2.getDueDate(),
+                TaskStatus.IN_BEARBEITUNG
+        );
+
+        taskService.updateTask(
+                task3.getId(),
+                task3.getTitle(),
+                task3.getDescription(),
+                task3.getPriority(),
+                task3.getDueDate(),
+                TaskStatus.ABGESCHLOSSEN
+        );
+
+        var stats = taskService.getTaskStats();
+
+        assertEquals(3L, stats.get("total"));
+        assertEquals(1L, stats.get("OFFEN"));
+        assertEquals(1L, stats.get("IN_BEARBEITUNG"));
+        assertEquals(1L, stats.get("ABGESCHLOSSEN"));
+    }
+
+    @Test
+    void shouldReturnZeroStatsWhenNoTasksExist() {
+
+        var stats = taskService.getTaskStats();
+
+        assertEquals(0L, stats.get("total"));
+        assertEquals(0L, stats.get("OFFEN"));
+        assertEquals(0L, stats.get("IN_BEARBEITUNG"));
+        assertEquals(0L, stats.get("ABGESCHLOSSEN"));
+    }
 }
