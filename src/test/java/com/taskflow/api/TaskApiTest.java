@@ -1,6 +1,8 @@
 
 package com.taskflow.api;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.taskflow.dto.CreateTaskRequest;
 import com.taskflow.enums.TaskStatus;
 import com.taskflow.service.TaskService;
@@ -14,6 +16,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,6 +25,7 @@ class TaskApiTest {
     private Javalin app;
     private HttpClient client;
     private String baseUrl;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     // Start a separate Javalin server before each test.
     @BeforeEach
@@ -39,6 +43,7 @@ class TaskApiTest {
                         ));
                     });
 
+            // Get all tasks.
             config.routes.get("/api/tasks", ctx -> {
                 ctx.json(taskService.getAllTasks());
             });
@@ -51,7 +56,7 @@ class TaskApiTest {
             // Get a task by its ID.
             config.routes.get("/api/tasks/{id}", ctx -> {
 
-                long id = Long.parseLong(ctx.pathParam("id"));
+                String id = ctx.pathParam("id");
 
                 var task = taskService.getTaskById(id);
 
@@ -65,6 +70,7 @@ class TaskApiTest {
                 }
             });
 
+            // Create a new task.
             config.routes.post("/api/tasks", ctx -> {
 
                 CreateTaskRequest request =
@@ -86,7 +92,7 @@ class TaskApiTest {
             // Update an existing task.
             config.routes.put("/api/tasks/{id}", ctx -> {
 
-                long id = Long.parseLong(ctx.pathParam("id"));
+                String id = ctx.pathParam("id");
 
                 CreateTaskRequest request =
                         ctx.bodyAsClass(CreateTaskRequest.class);
@@ -119,7 +125,7 @@ class TaskApiTest {
             // Delete a task by its ID.
             config.routes.delete("/api/tasks/{id}", ctx -> {
 
-                long id = Long.parseLong(ctx.pathParam("id"));
+                String id = ctx.pathParam("id");
 
                 boolean deleted = taskService.deleteTask(id);
 
@@ -146,6 +152,12 @@ class TaskApiTest {
     @AfterEach
     void tearDown() {
         app.stop();
+    }
+
+    // Extract the generated task ID from a JSON response.
+    private String extractTaskId(String responseBody) throws Exception {
+        JsonNode json = objectMapper.readTree(responseBody);
+        return json.get("id").asText();
     }
 
     // Test whether GET returns an empty task list initially.
@@ -192,6 +204,11 @@ class TaskApiTest {
         assertEquals(201, response.statusCode());
         assertTrue(response.body().contains("Test Task"));
         assertTrue(response.body().contains("HOCH"));
+
+        String id = extractTaskId(response.body());
+
+        assertNotNull(id);
+        assertDoesNotThrow(() -> UUID.fromString(id));
     }
 
     // Test whether invalid task data returns HTTP 400.
@@ -225,8 +242,10 @@ class TaskApiTest {
     @Test
     void shouldReturn404WhenTaskDoesNotExist() throws Exception {
 
+        String unknownId = UUID.randomUUID().toString();
+
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/api/tasks/999"))
+                .uri(URI.create(baseUrl + "/api/tasks/" + unknownId))
                 .GET()
                 .build();
 
@@ -239,16 +258,17 @@ class TaskApiTest {
         assertTrue(response.body().contains("Task not found."));
     }
 
+    // Test whether PUT updates an existing task successfully.
     @Test
     void shouldUpdateTaskSuccessfully() throws Exception {
 
         String createJson = """
-            {
-                "title": "Old Task",
-                "description": "Old Description",
-                "priority": "NIEDRIG"
-            }
-            """;
+                {
+                    "title": "Old Task",
+                    "description": "Old Description",
+                    "priority": "NIEDRIG"
+                }
+                """;
 
         HttpRequest createRequest = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/api/tasks"))
@@ -256,22 +276,26 @@ class TaskApiTest {
                 .POST(HttpRequest.BodyPublishers.ofString(createJson))
                 .build();
 
-        client.send(
+        HttpResponse<String> createResponse = client.send(
                 createRequest,
                 HttpResponse.BodyHandlers.ofString()
         );
 
+        assertEquals(201, createResponse.statusCode());
+
+        String taskId = extractTaskId(createResponse.body());
+
         String updateJson = """
-            {
-                "title": "Updated Task",
-                "description": "Updated Description",
-                "priority": "HOCH",
-                "status": "IN_BEARBEITUNG"
-            }
-            """;
+                {
+                    "title": "Updated Task",
+                    "description": "Updated Description",
+                    "priority": "HOCH",
+                    "status": "IN_BEARBEITUNG"
+                }
+                """;
 
         HttpRequest updateRequest = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/api/tasks/1"))
+                .uri(URI.create(baseUrl + "/api/tasks/" + taskId))
                 .header("Content-Type", "application/json")
                 .PUT(HttpRequest.BodyPublishers.ofString(updateJson))
                 .build();
@@ -286,16 +310,17 @@ class TaskApiTest {
         assertTrue(response.body().contains("IN_BEARBEITUNG"));
     }
 
+    // Test whether DELETE removes a task successfully.
     @Test
     void shouldDeleteTaskSuccessfully() throws Exception {
 
         String json = """
-            {
-                "title": "Task to Delete",
-                "description": "Testing DELETE endpoint",
-                "priority": "HOCH"
-            }
-            """;
+                {
+                    "title": "Task to Delete",
+                    "description": "Testing DELETE endpoint",
+                    "priority": "HOCH"
+                }
+                """;
 
         HttpRequest createRequest = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/api/tasks"))
@@ -303,13 +328,17 @@ class TaskApiTest {
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
-        client.send(
+        HttpResponse<String> createResponse = client.send(
                 createRequest,
                 HttpResponse.BodyHandlers.ofString()
         );
 
+        assertEquals(201, createResponse.statusCode());
+
+        String taskId = extractTaskId(createResponse.body());
+
         HttpRequest deleteRequest = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/api/tasks/1"))
+                .uri(URI.create(baseUrl + "/api/tasks/" + taskId))
                 .DELETE()
                 .build();
 
@@ -321,7 +350,7 @@ class TaskApiTest {
         assertEquals(204, response.statusCode());
 
         HttpRequest getRequest = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/api/tasks/1"))
+                .uri(URI.create(baseUrl + "/api/tasks/" + taskId))
                 .GET()
                 .build();
 
@@ -333,11 +362,14 @@ class TaskApiTest {
         assertEquals(404, getResponse.statusCode());
     }
 
+    // Test whether DELETE returns 404 for a non-existing task.
     @Test
     void shouldReturn404WhenDeletingNonExistingTask() throws Exception {
 
+        String unknownId = UUID.randomUUID().toString();
+
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/api/tasks/999"))
+                .uri(URI.create(baseUrl + "/api/tasks/" + unknownId))
                 .DELETE()
                 .build();
 
@@ -350,16 +382,17 @@ class TaskApiTest {
         assertTrue(response.body().contains("Task not found."));
     }
 
+    // Test whether GET returns correct task statistics.
     @Test
     void shouldReturnTaskStatistics() throws Exception {
 
         String json = """
-            {
-                "title": "Stats Test Task",
-                "description": "Testing statistics",
-                "priority": "HOCH"
-            }
-            """;
+                {
+                    "title": "Stats Test Task",
+                    "description": "Testing statistics",
+                    "priority": "HOCH"
+                }
+                """;
 
         HttpRequest createRequest = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/api/tasks"))

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,7 +35,8 @@ class TaskServiceTest {
         );
 
         assertNotNull(task);
-        assertEquals(1L, task.getId());
+        assertNotNull(task.getId());
+        assertDoesNotThrow(() -> UUID.fromString(task.getId()));
         assertEquals("Test Task", task.getTitle());
         assertEquals("Testing task creation", task.getDescription());
         assertEquals(Priority.HOCH, task.getPriority());
@@ -42,7 +44,7 @@ class TaskServiceTest {
         assertNotNull(task.getCreatedAt());
     }
 
-    // Test whether a new task receives a unique ID.
+    // Test whether a new task receives a unique UUID.
     @Test
     void shouldGenerateUniqueIds() {
 
@@ -54,8 +56,12 @@ class TaskServiceTest {
                 "Second Task", "Second", Priority.NIEDRIG, null
         );
 
-        assertEquals(1L, firstTask.getId());
-        assertEquals(2L, secondTask.getId());
+        assertNotNull(firstTask.getId());
+        assertNotNull(secondTask.getId());
+        assertNotEquals(firstTask.getId(), secondTask.getId());
+
+        assertDoesNotThrow(() -> UUID.fromString(firstTask.getId()));
+        assertDoesNotThrow(() -> UUID.fromString(secondTask.getId()));
     }
 
     // Test whether all created tasks are returned.
@@ -95,7 +101,8 @@ class TaskServiceTest {
                 null
         );
 
-        Optional<Task> result = taskService.getTaskById(createdTask.getId());
+        Optional<Task> result =
+                taskService.getTaskById(createdTask.getId());
 
         assertTrue(result.isPresent());
         assertEquals("Test Task", result.get().getTitle());
@@ -104,7 +111,8 @@ class TaskServiceTest {
     @Test
     void shouldReturnEmptyWhenTaskIdDoesNotExist() {
 
-        Optional<Task> result = taskService.getTaskById(999L);
+        Optional<Task> result =
+                taskService.getTaskById(UUID.randomUUID().toString());
 
         assertTrue(result.isEmpty());
     }
@@ -139,7 +147,7 @@ class TaskServiceTest {
     void shouldReturnEmptyWhenUpdatingNonExistingTask() {
 
         Optional<Task> result = taskService.updateTask(
-                999L,
+                UUID.randomUUID().toString(),
                 "New Title",
                 "New Description",
                 Priority.HOCH,
@@ -149,7 +157,6 @@ class TaskServiceTest {
 
         assertTrue(result.isEmpty());
     }
-
 
     @Test
     void shouldDeleteTaskSuccessfully() {
@@ -170,7 +177,9 @@ class TaskServiceTest {
     @Test
     void shouldReturnFalseWhenDeletingNonExistingTask() {
 
-        boolean result = taskService.deleteTask(999L);
+        boolean result = taskService.deleteTask(
+                UUID.randomUUID().toString()
+        );
 
         assertFalse(result);
     }

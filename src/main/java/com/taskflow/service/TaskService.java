@@ -1,3 +1,4 @@
+
 package com.taskflow.service;
 
 import com.taskflow.enums.Priority;
@@ -10,17 +11,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Handles the business logic for managing tasks.
  * Currently, tasks are stored temporarily in memory.
  */
-
 public class TaskService {
 
     private final List<Task> tasks = new ArrayList<>();
-
-    private long nextId = 1;
 
     /**
      * Returns all tasks currently stored in the system.
@@ -30,15 +29,16 @@ public class TaskService {
     }
 
     /**
-     * Creates a new task with an automatically generated ID,
+     * Creates a new task with a UUID,
      * the default status OFFEN, and the current creation time.
      */
-
     public Task createTask(String title, String description,
                            Priority priority, LocalDate dueDate) {
 
+        String id = UUID.randomUUID().toString();
+
         Task task = new Task(
-                nextId++,
+                id,
                 title,
                 description,
                 priority,
@@ -58,9 +58,9 @@ public class TaskService {
      * @param id the ID of the task
      * @return an Optional containing the task if found
      */
-    public Optional<Task> getTaskById(long id) {
+    public Optional<Task> getTaskById(String id) {
         return tasks.stream()
-                .filter(task -> task.getId() == id)
+                .filter(task -> task.getId().equals(id))
                 .findFirst();
     }
 
@@ -76,7 +76,7 @@ public class TaskService {
      * @return an Optional containing the updated task if found
      */
     public Optional<Task> updateTask(
-            long id,
+            String id,
             String title,
             String description,
             Priority priority,
@@ -100,22 +100,28 @@ public class TaskService {
         return Optional.of(task);
     }
 
-
     /**
      * Deletes a task by its ID.
      *
      * @param id the ID of the task to delete
      * @return true if the task was deleted, false if it was not found
      */
-    public boolean deleteTask(long id) {
-        return tasks.removeIf(task -> task.getId() == id);
+    public boolean deleteTask(String id) {
+        Optional<Task> task = getTaskById(id);
+
+        if (task.isEmpty()) {
+            return false;
+        }
+
+        tasks.remove(task.get());
+        return true;
     }
 
     /**
-     * Returns statistics about all tasks.
+     * Returns statistics about the tasks.
      *
      * @return a map containing the total number of tasks
-     *         and the number of tasks for each status
+     * and the number of tasks for each status
      */
     public Map<String, Long> getTaskStats() {
 

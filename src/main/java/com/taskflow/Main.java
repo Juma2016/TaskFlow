@@ -8,6 +8,8 @@ import com.taskflow.dto.CreateTaskRequest;
 import com.taskflow.validation.TaskValidator;
 import io.javalin.Javalin;
 
+import java.util.Map;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -22,7 +24,7 @@ public class Main {
             config.routes.exception(IllegalArgumentException.class,
                     (e, ctx) -> {
                         ctx.status(400);
-                        ctx.json(java.util.Map.of(
+                        ctx.json(Map.of(
                                 "error", e.getMessage()
                         ));
                     });
@@ -45,7 +47,7 @@ public class Main {
             // Get a task by its ID.
             config.routes.get("/api/tasks/{id}", ctx -> {
 
-                long id = Long.parseLong(ctx.pathParam("id"));
+                String id = ctx.pathParam("id");
 
                 var task = taskService.getTaskById(id);
 
@@ -53,7 +55,7 @@ public class Main {
                     ctx.json(task.get());
                 } else {
                     ctx.status(404);
-                    ctx.json(java.util.Map.of(
+                    ctx.json(Map.of(
                             "error", "Task not found."
                     ));
                 }
@@ -82,7 +84,7 @@ public class Main {
             // Update an existing task.
             config.routes.put("/api/tasks/{id}", ctx -> {
 
-                long id = Long.parseLong(ctx.pathParam("id"));
+                String id = ctx.pathParam("id");
 
                 CreateTaskRequest request =
                         ctx.bodyAsClass(CreateTaskRequest.class);
@@ -106,17 +108,16 @@ public class Main {
                     ctx.json(updatedTask.get());
                 } else {
                     ctx.status(404);
-                    ctx.json(java.util.Map.of(
+                    ctx.json(Map.of(
                             "error", "Task not found."
                     ));
                 }
             });
 
-
             // Delete a task by its ID.
             config.routes.delete("/api/tasks/{id}", ctx -> {
 
-                long id = Long.parseLong(ctx.pathParam("id"));
+                String id = ctx.pathParam("id");
 
                 boolean deleted = taskService.deleteTask(id);
 
@@ -124,12 +125,11 @@ public class Main {
                     ctx.status(204);
                 } else {
                     ctx.status(404);
-                    ctx.json(java.util.Map.of(
+                    ctx.json(Map.of(
                             "error", "Task not found."
                     ));
                 }
             });
-
 
         });
 

@@ -1,3 +1,4 @@
+
 package com.taskflow.model;
 
 import com.taskflow.enums.Priority;
@@ -8,7 +9,7 @@ import java.time.LocalDateTime;
 
 public class Task {
 
-    private Long id;
+    private String id;
     private String title;
     private String description;
     private Priority priority;
@@ -19,7 +20,7 @@ public class Task {
     public Task() {
     }
 
-    public Task(Long id, String title, String description,
+    public Task(String id, String title, String description,
                 Priority priority, LocalDate dueDate,
                 TaskStatus status, LocalDateTime createdAt) {
 
@@ -34,11 +35,11 @@ public class Task {
 
     // Getters and Setters
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
