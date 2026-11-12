@@ -1,12 +1,16 @@
 
 package com.taskflow.service;
 
-import com.taskflow.enums.Priority;
-import com.taskflow.enums.TaskStatus;
+import com.taskflow.db.DatabaseManager;
+import com.taskflow.db.SqliteTaskRepository;
+import com.taskflow.model.Priority;
 import com.taskflow.model.Task;
+import com.taskflow.model.TaskStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,10 +21,21 @@ class TaskServiceTest {
 
     private TaskService taskService;
 
-    // Create a fresh TaskService before each test.
+    @TempDir
+    Path tempDir;
+
+    // Create a fresh SQLite database before each test.
     @BeforeEach
     void setUp() {
-        taskService = new TaskService();
+
+        DatabaseManager databaseManager = new DatabaseManager(
+                "jdbc:sqlite:" + tempDir.resolve("test-taskflow.db").toAbsolutePath()
+        );
+
+        SqliteTaskRepository repository =
+                new SqliteTaskRepository(databaseManager);
+
+        taskService = new TaskService(repository);
     }
 
     // Test whether a task is created correctly.
@@ -49,11 +64,17 @@ class TaskServiceTest {
     void shouldGenerateUniqueIds() {
 
         Task firstTask = taskService.createTask(
-                "First Task", "First", Priority.MITTEL, null
+                "First Task",
+                "First",
+                Priority.MITTEL,
+                null
         );
 
         Task secondTask = taskService.createTask(
-                "Second Task", "Second", Priority.NIEDRIG, null
+                "Second Task",
+                "Second",
+                Priority.NIEDRIG,
+                null
         );
 
         assertNotNull(firstTask.getId());
@@ -69,11 +90,17 @@ class TaskServiceTest {
     void shouldReturnAllTasks() {
 
         taskService.createTask(
-                "Task One", "First task", Priority.HOCH, null
+                "Task One",
+                "First task",
+                Priority.HOCH,
+                null
         );
 
         taskService.createTask(
-                "Task Two", "Second task", Priority.NIEDRIG, null
+                "Task Two",
+                "Second task",
+                Priority.NIEDRIG,
+                null
         );
 
         List<Task> tasks = taskService.getAllTasks();
@@ -91,6 +118,7 @@ class TaskServiceTest {
         assertTrue(tasks.isEmpty());
     }
 
+    // Test whether a task can be found by its ID.
     @Test
     void shouldFindTaskById() {
 
@@ -108,6 +136,7 @@ class TaskServiceTest {
         assertEquals("Test Task", result.get().getTitle());
     }
 
+    // Test whether an unknown task ID returns an empty Optional.
     @Test
     void shouldReturnEmptyWhenTaskIdDoesNotExist() {
 
@@ -117,6 +146,7 @@ class TaskServiceTest {
         assertTrue(result.isEmpty());
     }
 
+    // Test whether an existing task can be updated.
     @Test
     void shouldUpdateTaskSuccessfully() {
 
@@ -143,6 +173,7 @@ class TaskServiceTest {
         assertEquals(TaskStatus.IN_BEARBEITUNG, result.get().getStatus());
     }
 
+    // Test whether updating a non-existing task returns an empty Optional.
     @Test
     void shouldReturnEmptyWhenUpdatingNonExistingTask() {
 
@@ -158,6 +189,7 @@ class TaskServiceTest {
         assertTrue(result.isEmpty());
     }
 
+    // Test whether an existing task can be deleted.
     @Test
     void shouldDeleteTaskSuccessfully() {
 
@@ -174,6 +206,7 @@ class TaskServiceTest {
         assertTrue(taskService.getTaskById(task.getId()).isEmpty());
     }
 
+    // Test whether deleting a non-existing task returns false.
     @Test
     void shouldReturnFalseWhenDeletingNonExistingTask() {
 
@@ -184,6 +217,7 @@ class TaskServiceTest {
         assertFalse(result);
     }
 
+    // Test whether task statistics are calculated correctly.
     @Test
     void shouldReturnCorrectTaskStats() {
 
@@ -213,7 +247,7 @@ class TaskServiceTest {
                 task2.getTitle(),
                 task2.getDescription(),
                 task2.getPriority(),
-                task2.getDueDate(),
+                null,
                 TaskStatus.IN_BEARBEITUNG
         );
 
@@ -222,7 +256,7 @@ class TaskServiceTest {
                 task3.getTitle(),
                 task3.getDescription(),
                 task3.getPriority(),
-                task3.getDueDate(),
+                null,
                 TaskStatus.ABGESCHLOSSEN
         );
 
@@ -234,6 +268,7 @@ class TaskServiceTest {
         assertEquals(1L, stats.get("ABGESCHLOSSEN"));
     }
 
+    // Test whether all statistics are zero when no tasks exist.
     @Test
     void shouldReturnZeroStatsWhenNoTasksExist() {
 

@@ -1,7 +1,7 @@
 package com.taskflow.validation;
 
 import com.taskflow.dto.CreateTaskRequest;
-import com.taskflow.enums.Priority;
+import com.taskflow.model.Priority;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

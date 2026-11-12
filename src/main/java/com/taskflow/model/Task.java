@@ -1,11 +1,9 @@
 
 package com.taskflow.model;
 
-import com.taskflow.enums.Priority;
-import com.taskflow.enums.TaskStatus;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Task {
 
@@ -13,15 +11,16 @@ public class Task {
     private String title;
     private String description;
     private Priority priority;
-    private LocalDate dueDate;
+    private LocalDateTime dueDate;
     private TaskStatus status;
     private LocalDateTime createdAt;
+    private List<TaskStatusHistory> history = new ArrayList<>();
 
     public Task() {
     }
 
     public Task(String id, String title, String description,
-                Priority priority, LocalDate dueDate,
+                Priority priority, LocalDateTime dueDate,
                 TaskStatus status, LocalDateTime createdAt) {
 
         this.id = id;
@@ -32,8 +31,6 @@ public class Task {
         this.status = status;
         this.createdAt = createdAt;
     }
-
-    // Getters and Setters
 
     public String getId() {
         return id;
@@ -67,11 +64,11 @@ public class Task {
         this.priority = priority;
     }
 
-    public LocalDate getDueDate() {
+    public LocalDateTime getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(LocalDate dueDate) {
+    public void setDueDate(LocalDateTime dueDate) {
         this.dueDate = dueDate;
     }
 
@@ -89,5 +86,13 @@ public class Task {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public List<TaskStatusHistory> getHistory() {
+        return history;
+    }
+
+    public void setHistory(List<TaskStatusHistory> history) {
+        this.history = history;
     }
 }

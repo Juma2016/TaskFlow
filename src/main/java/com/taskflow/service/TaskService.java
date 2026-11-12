@@ -1,80 +1,56 @@
 
 package com.taskflow.service;
 
-import com.taskflow.enums.Priority;
-import com.taskflow.enums.TaskStatus;
+import com.taskflow.db.TaskRepository;
+import com.taskflow.model.Priority;
 import com.taskflow.model.Task;
-
+import com.taskflow.model.TaskFilterCriteria;
+import com.taskflow.model.TaskStatistics;
+import com.taskflow.model.TaskStatus;
+import com.taskflow.model.TaskFilterCriteria;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Handles the business logic for managing tasks.
- * Currently, tasks are stored temporarily in memory.
- */
 public class TaskService {
 
-    private final List<Task> tasks = new ArrayList<>();
+    private final TaskRepository taskRepository;
 
-    /**
-     * Returns all tasks currently stored in the system.
-     */
-    public List<Task> getAllTasks() {
-        return tasks;
+    public TaskService(TaskRepository taskRepository) {
+        this.taskRepository = taskRepository;
     }
 
-    /**
-     * Creates a new task with a UUID,
-     * the default status OFFEN, and the current creation time.
-     */
+    public List<Task> getAllTasks() {
+        return taskRepository.findAll(new TaskFilterCriteria());
+    }
+
+    public List<Task> getAllTasks(TaskFilterCriteria criteria) {
+        return taskRepository.findAll(criteria);
+    }
+
     public Task createTask(String title, String description,
                            Priority priority, LocalDate dueDate) {
 
-        String id = UUID.randomUUID().toString();
-
         Task task = new Task(
-                id,
+                UUID.randomUUID().toString(),
                 title,
                 description,
                 priority,
-                dueDate,
+                dueDate != null ? dueDate.atStartOfDay() : null,
                 TaskStatus.OFFEN,
                 LocalDateTime.now()
         );
 
-        tasks.add(task);
-
-        return task;
+        return taskRepository.save(task);
     }
 
-    /**
-     * Finds a task by its ID.
-     *
-     * @param id the ID of the task
-     * @return an Optional containing the task if found
-     */
     public Optional<Task> getTaskById(String id) {
-        return tasks.stream()
-                .filter(task -> task.getId().equals(id))
-                .findFirst();
+        return taskRepository.findById(id);
     }
 
-    /**
-     * Updates an existing task with the provided information.
-     *
-     * @param id the ID of the task to update
-     * @param title the new task title
-     * @param description the new task description
-     * @param priority the new task priority
-     * @param dueDate the new due date
-     * @param status the new task status
-     * @return an Optional containing the updated task if found
-     */
     public Optional<Task> updateTask(
             String id,
             String title,
@@ -83,7 +59,7 @@ public class TaskService {
             LocalDate dueDate,
             TaskStatus status) {
 
-        Optional<Task> existingTask = getTaskById(id);
+        Optional<Task> existingTask = taskRepository.findById(id);
 
         if (existingTask.isEmpty()) {
             return Optional.empty();
@@ -94,56 +70,29 @@ public class TaskService {
         task.setTitle(title);
         task.setDescription(description);
         task.setPriority(priority);
-        task.setDueDate(dueDate);
+        task.setDueDate(dueDate != null ? dueDate.atStartOfDay() : null);
         task.setStatus(status);
 
-        return Optional.of(task);
+        boolean updated = taskRepository.update(task);
+
+        return updated ? taskRepository.findById(id) : Optional.empty();
     }
 
-    /**
-     * Deletes a task by its ID.
-     *
-     * @param id the ID of the task to delete
-     * @return true if the task was deleted, false if it was not found
-     */
     public boolean deleteTask(String id) {
-        Optional<Task> task = getTaskById(id);
-
-        if (task.isEmpty()) {
-            return false;
-        }
-
-        tasks.remove(task.get());
-        return true;
+        return taskRepository.deleteById(id);
     }
 
-    /**
-     * Returns statistics about the tasks.
-     *
-     * @return a map containing the total number of tasks
-     * and the number of tasks for each status
-     */
     public Map<String, Long> getTaskStats() {
 
-        long total = tasks.size();
-
-        long open = tasks.stream()
-                .filter(task -> task.getStatus() == TaskStatus.OFFEN)
-                .count();
-
-        long inProgress = tasks.stream()
-                .filter(task -> task.getStatus() == TaskStatus.IN_BEARBEITUNG)
-                .count();
-
-        long completed = tasks.stream()
-                .filter(task -> task.getStatus() == TaskStatus.ABGESCHLOSSEN)
-                .count();
+        TaskStatistics stats = taskRepository.getStatistics();
 
         return Map.of(
-                "total", total,
-                "OFFEN", open,
-                "IN_BEARBEITUNG", inProgress,
-                "ABGESCHLOSSEN", completed
+                "total", stats.getTotalCount(),
+                "OFFEN", stats.getCountByStatus().getOrDefault(TaskStatus.OFFEN, 0L),
+                "IN_BEARBEITUNG", stats.getCountByStatus()
+                        .getOrDefault(TaskStatus.IN_BEARBEITUNG, 0L),
+                "ABGESCHLOSSEN", stats.getCountByStatus()
+                        .getOrDefault(TaskStatus.ABGESCHLOSSEN, 0L)
         );
     }
 }

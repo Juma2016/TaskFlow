@@ -1,4 +1,4 @@
-package com.taskflow.enums;
+package com.taskflow.model;
 
 public enum Priority {
     NIEDRIG,

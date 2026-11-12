@@ -1,12 +1,17 @@
 
 package com.taskflow;
 
-import com.taskflow.enums.TaskStatus;
+import com.taskflow.model.TaskStatus;
 import com.taskflow.model.Task;
 import com.taskflow.service.TaskService;
 import com.taskflow.dto.CreateTaskRequest;
 import com.taskflow.validation.TaskValidator;
 import io.javalin.Javalin;
+import com.taskflow.db.DatabaseManager;
+import com.taskflow.db.TaskRepository;
+import com.taskflow.db.SqliteTaskRepository;
+import com.taskflow.model.Priority;
+import com.taskflow.model.TaskFilterCriteria;
 
 import java.util.Map;
 
@@ -14,8 +19,15 @@ public class Main {
 
     public static void main(String[] args) {
 
+        // Initialize the SQLite database.
+        DatabaseManager databaseManager = new DatabaseManager();
+
+        // Create the SQLite repository.
+        TaskRepository taskRepository =
+                new SqliteTaskRepository(databaseManager);
+
         // Create the service responsible for managing tasks.
-        TaskService taskService = new TaskService();
+        TaskService taskService = new TaskService(taskRepository);
 
         // Create and configure the Javalin application.
         Javalin app = Javalin.create(config -> {
@@ -34,9 +46,53 @@ public class Main {
                 ctx.result("Willkommen bei TaskFlow!");
             });
 
-            // Get all tasks.
+
+// Get all tasks with optional filters.
             config.routes.get("/api/tasks", ctx -> {
-                ctx.json(taskService.getAllTasks());
+
+                TaskFilterCriteria criteria = new TaskFilterCriteria();
+
+                // Filter by status.
+                String status = ctx.queryParam("status");
+                if (status != null && !status.isBlank()) {
+                    try {
+                        criteria.setStatus(TaskStatus.valueOf(status.toUpperCase()));
+                    } catch (IllegalArgumentException e) {
+                        throw new IllegalArgumentException("Invalid task status: " + status);
+                    }
+                }
+
+                // Filter by priority.
+                String priority = ctx.queryParam("priority");
+                if (priority != null && !priority.isBlank()) {
+                    try {
+                        criteria.setPriority(Priority.valueOf(priority.toUpperCase()));
+                    } catch (IllegalArgumentException e) {
+                        throw new IllegalArgumentException("Invalid task priority: " + priority);
+                    }
+                }
+
+                // Search by keyword.
+                String keyword = ctx.queryParam("keyword");
+                if (keyword != null && !keyword.isBlank()) {
+                    criteria.setKeyword(keyword);
+                }
+
+                // Filter by due date.
+                String dueFilter = ctx.queryParam("dueFilter");
+                if (dueFilter != null && !dueFilter.isBlank()) {
+                    try {
+                        criteria.setDueFilter(
+                                TaskFilterCriteria.DueFilter.valueOf(
+                                        dueFilter.toUpperCase()
+                                )
+                        );
+                    } catch (IllegalArgumentException e) {
+                        throw new IllegalArgumentException("Invalid due filter: " + dueFilter);
+                    }
+                }
+
+                ctx.json(taskService.getAllTasks(criteria));
             });
 
             // Get task statistics.

@@ -3,19 +3,23 @@ package com.taskflow.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.taskflow.db.DatabaseManager;
+import com.taskflow.db.SqliteTaskRepository;
 import com.taskflow.dto.CreateTaskRequest;
-import com.taskflow.enums.TaskStatus;
+import com.taskflow.model.TaskStatus;
 import com.taskflow.service.TaskService;
 import com.taskflow.validation.TaskValidator;
 import io.javalin.Javalin;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,16 +29,32 @@ class TaskApiTest {
     private Javalin app;
     private HttpClient client;
     private String baseUrl;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @TempDir
+    Path tempDir;
 
     // Start a separate Javalin server before each test.
     @BeforeEach
     void setUp() {
 
-        TaskService taskService = new TaskService();
+        // Create a separate SQLite database for each test.
+        DatabaseManager databaseManager = new DatabaseManager(
+                "jdbc:sqlite:" + tempDir.resolve("test-taskflow.db").toAbsolutePath()
+        );
 
+        // Create the SQLite repository.
+        SqliteTaskRepository repository =
+                new SqliteTaskRepository(databaseManager);
+
+        // Create the service using the repository.
+        TaskService taskService = new TaskService(repository);
+
+        // Create and configure the Javalin application.
         app = Javalin.create(config -> {
 
+            // Handle invalid input and return HTTP 400.
             config.routes.exception(IllegalArgumentException.class,
                     (e, ctx) -> {
                         ctx.status(400);
@@ -140,6 +160,7 @@ class TaskApiTest {
             });
         });
 
+        // Start the server on a random available port.
         app.start(0);
 
         int port = app.port();
@@ -151,7 +172,9 @@ class TaskApiTest {
     // Stop the server after each test.
     @AfterEach
     void tearDown() {
-        app.stop();
+        if (app != null) {
+            app.stop();
+        }
     }
 
     // Extract the generated task ID from a JSON response.

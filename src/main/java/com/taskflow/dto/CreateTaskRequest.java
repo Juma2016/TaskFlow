@@ -1,8 +1,8 @@
 package com.taskflow.dto;
 
-import com.taskflow.enums.Priority;
+import com.taskflow.model.Priority;
 import java.time.LocalDate;
-import com.taskflow.enums.TaskStatus;
+import com.taskflow.model.TaskStatus;
 
 public class CreateTaskRequest {
 
