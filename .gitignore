@@ -1,4 +1,16 @@
-/target/
+# database
 *.db
 *.db-wal
 *.db-shm
+
+# IntelliJ IDEA
+.idea/
+
+# Maven
+target/
+
+# Compiled files
+*.class
+
+# Logs
+*.log
