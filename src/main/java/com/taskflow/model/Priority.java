@@ -1,5 +1,7 @@
 package com.taskflow.model;
 
-public class Priority {
-    
+public enum Priority {
+    NIEDRIG,
+    MITTEL,
+    HOCH
 }
