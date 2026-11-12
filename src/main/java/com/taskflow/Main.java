@@ -1,6 +1,8 @@
 
 package com.taskflow;
 
+import com.taskflow.db.DatabaseManager;
+
 import io.javalin.Javalin;
 
 public class Main {
@@ -18,6 +20,9 @@ public class Main {
             });
 
         }).start(7070);
+
+        DatabaseManager dbManager = new DatabaseManager();
+        System.out.println("Program started successfully, database is ready!");
 
     }
 }
