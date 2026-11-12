@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -82,5 +83,29 @@ class TaskServiceTest {
 
         assertNotNull(tasks);
         assertTrue(tasks.isEmpty());
+    }
+
+    @Test
+    void shouldFindTaskById() {
+
+        Task createdTask = taskService.createTask(
+                "Test Task",
+                "Testing getTaskById",
+                Priority.HOCH,
+                null
+        );
+
+        Optional<Task> result = taskService.getTaskById(createdTask.getId());
+
+        assertTrue(result.isPresent());
+        assertEquals("Test Task", result.get().getTitle());
+    }
+
+    @Test
+    void shouldReturnEmptyWhenTaskIdDoesNotExist() {
+
+        Optional<Task> result = taskService.getTaskById(999L);
+
+        assertTrue(result.isEmpty());
     }
 }

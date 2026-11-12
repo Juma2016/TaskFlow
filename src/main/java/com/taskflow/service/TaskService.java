@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Handles the business logic for managing tasks.
@@ -48,5 +49,17 @@ public class TaskService {
         tasks.add(task);
 
         return task;
+    }
+
+    /**
+     * Finds a task by its ID.
+     *
+     * @param id the ID of the task
+     * @return an Optional containing the task if found
+     */
+    public Optional<Task> getTaskById(long id) {
+        return tasks.stream()
+                .filter(task -> task.getId() == id)
+                .findFirst();
     }
 }

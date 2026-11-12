@@ -38,6 +38,23 @@ public class Main {
                 ctx.json(taskService.getAllTasks());
             });
 
+            // Get a task by its ID.
+            config.routes.get("/api/tasks/{id}", ctx -> {
+
+                long id = Long.parseLong(ctx.pathParam("id"));
+
+                var task = taskService.getTaskById(id);
+
+                if (task.isPresent()) {
+                    ctx.json(task.get());
+                } else {
+                    ctx.status(404);
+                    ctx.json(java.util.Map.of(
+                            "error", "Task not found."
+                    ));
+                }
+            });
+
             // Create a new task.
             // Reads the JSON request, validates it and creates a task.
             config.routes.post("/api/tasks", ctx -> {

@@ -42,6 +42,23 @@ class TaskApiTest {
                 ctx.json(taskService.getAllTasks());
             });
 
+            // Get a task by its ID.
+            config.routes.get("/api/tasks/{id}", ctx -> {
+
+                long id = Long.parseLong(ctx.pathParam("id"));
+
+                var task = taskService.getTaskById(id);
+
+                if (task.isPresent()) {
+                    ctx.json(task.get());
+                } else {
+                    ctx.status(404);
+                    ctx.json(java.util.Map.of(
+                            "error", "Task not found."
+                    ));
+                }
+            });
+
             config.routes.post("/api/tasks", ctx -> {
 
                 CreateTaskRequest request =
@@ -146,5 +163,23 @@ class TaskApiTest {
 
         assertEquals(400, response.statusCode());
         assertTrue(response.body().contains("Task title is required."));
+    }
+
+    // Test whether a non-existing task returns HTTP 404.
+    @Test
+    void shouldReturn404WhenTaskDoesNotExist() throws Exception {
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/tasks/999"))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(
+                request,
+                HttpResponse.BodyHandlers.ofString()
+        );
+
+        assertEquals(404, response.statusCode());
+        assertTrue(response.body().contains("Task not found."));
     }
 }
