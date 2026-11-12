@@ -108,4 +108,45 @@ class TaskServiceTest {
 
         assertTrue(result.isEmpty());
     }
+
+    @Test
+    void shouldUpdateTaskSuccessfully() {
+
+        Task task = taskService.createTask(
+                "Old Title",
+                "Old Description",
+                Priority.NIEDRIG,
+                null
+        );
+
+        Optional<Task> result = taskService.updateTask(
+                task.getId(),
+                "New Title",
+                "New Description",
+                Priority.HOCH,
+                null,
+                TaskStatus.IN_BEARBEITUNG
+        );
+
+        assertTrue(result.isPresent());
+        assertEquals("New Title", result.get().getTitle());
+        assertEquals("New Description", result.get().getDescription());
+        assertEquals(Priority.HOCH, result.get().getPriority());
+        assertEquals(TaskStatus.IN_BEARBEITUNG, result.get().getStatus());
+    }
+
+    @Test
+    void shouldReturnEmptyWhenUpdatingNonExistingTask() {
+
+        Optional<Task> result = taskService.updateTask(
+                999L,
+                "New Title",
+                "New Description",
+                Priority.HOCH,
+                null,
+                TaskStatus.OFFEN
+        );
+
+        assertTrue(result.isEmpty());
+    }
 }
