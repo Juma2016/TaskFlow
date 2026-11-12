@@ -4,6 +4,7 @@ import com.taskflow.enums.Priority;
 import com.taskflow.enums.TaskStatus;
 import com.taskflow.model.Task;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,15 +31,16 @@ public class TaskService {
      * Creates a new task with an automatically generated ID,
      * the default status OFFEN, and the current creation time.
      */
+
     public Task createTask(String title, String description,
-                           Priority priority) {
+                           Priority priority, LocalDate dueDate) {
 
         Task task = new Task(
                 nextId++,
                 title,
                 description,
                 priority,
-                null,
+                dueDate,
                 TaskStatus.OFFEN,
                 LocalDateTime.now()
         );
