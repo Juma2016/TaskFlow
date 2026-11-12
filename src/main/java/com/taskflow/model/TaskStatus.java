@@ -1,5 +1,7 @@
 package com.taskflow.model;
 
-public class TaskStatus {
-    
+public enum TaskStatus {
+    OFFEN,
+    IN_BEARBEITUNG,
+    ABGESCHLOSSEN
 }
