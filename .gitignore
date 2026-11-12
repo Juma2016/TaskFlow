@@ -1,1 +1,11 @@
-/target/
+# IntelliJ IDEA
+.idea/
+
+# Maven
+target/
+
+# Compiled files
+*.class
+
+# Logs
+*.log
