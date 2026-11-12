@@ -107,6 +107,25 @@ public class Main {
                 }
             });
 
+
+            // Delete a task by its ID.
+            config.routes.delete("/api/tasks/{id}", ctx -> {
+
+                long id = Long.parseLong(ctx.pathParam("id"));
+
+                boolean deleted = taskService.deleteTask(id);
+
+                if (deleted) {
+                    ctx.status(204);
+                } else {
+                    ctx.status(404);
+                    ctx.json(java.util.Map.of(
+                            "error", "Task not found."
+                    ));
+                }
+            });
+
+
         });
 
         // Start the server on port 7070.

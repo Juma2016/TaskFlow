@@ -98,4 +98,16 @@ public class TaskService {
 
         return Optional.of(task);
     }
+
+
+    /**
+     * Deletes a task by its ID.
+     *
+     * @param id the ID of the task to delete
+     * @return true if the task was deleted, false if it was not found
+     */
+    public boolean deleteTask(long id) {
+        return tasks.removeIf(task -> task.getId() == id);
+    }
+
 }

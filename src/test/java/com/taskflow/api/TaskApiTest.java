@@ -110,6 +110,23 @@ class TaskApiTest {
                     ));
                 }
             });
+
+            // Delete a task by its ID.
+            config.routes.delete("/api/tasks/{id}", ctx -> {
+
+                long id = Long.parseLong(ctx.pathParam("id"));
+
+                boolean deleted = taskService.deleteTask(id);
+
+                if (deleted) {
+                    ctx.status(204);
+                } else {
+                    ctx.status(404);
+                    ctx.json(java.util.Map.of(
+                            "error", "Task not found."
+                    ));
+                }
+            });
         });
 
         app.start(0);
@@ -262,5 +279,69 @@ class TaskApiTest {
         assertEquals(200, response.statusCode());
         assertTrue(response.body().contains("Updated Task"));
         assertTrue(response.body().contains("IN_BEARBEITUNG"));
+    }
+
+    @Test
+    void shouldDeleteTaskSuccessfully() throws Exception {
+
+        String json = """
+            {
+                "title": "Task to Delete",
+                "description": "Testing DELETE endpoint",
+                "priority": "HOCH"
+            }
+            """;
+
+        HttpRequest createRequest = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/tasks"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+
+        client.send(
+                createRequest,
+                HttpResponse.BodyHandlers.ofString()
+        );
+
+        HttpRequest deleteRequest = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/tasks/1"))
+                .DELETE()
+                .build();
+
+        HttpResponse<String> response = client.send(
+                deleteRequest,
+                HttpResponse.BodyHandlers.ofString()
+        );
+
+        assertEquals(204, response.statusCode());
+
+        HttpRequest getRequest = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/tasks/1"))
+                .GET()
+                .build();
+
+        HttpResponse<String> getResponse = client.send(
+                getRequest,
+                HttpResponse.BodyHandlers.ofString()
+        );
+
+        assertEquals(404, getResponse.statusCode());
+    }
+
+    @Test
+    void shouldReturn404WhenDeletingNonExistingTask() throws Exception {
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/tasks/999"))
+                .DELETE()
+                .build();
+
+        HttpResponse<String> response = client.send(
+                request,
+                HttpResponse.BodyHandlers.ofString()
+        );
+
+        assertEquals(404, response.statusCode());
+        assertTrue(response.body().contains("Task not found."));
     }
 }

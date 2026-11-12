@@ -149,4 +149,30 @@ class TaskServiceTest {
 
         assertTrue(result.isEmpty());
     }
+
+
+    @Test
+    void shouldDeleteTaskSuccessfully() {
+
+        Task task = taskService.createTask(
+                "Task to Delete",
+                "This task will be deleted",
+                Priority.HOCH,
+                null
+        );
+
+        boolean result = taskService.deleteTask(task.getId());
+
+        assertTrue(result);
+        assertTrue(taskService.getTaskById(task.getId()).isEmpty());
+    }
+
+    @Test
+    void shouldReturnFalseWhenDeletingNonExistingTask() {
+
+        boolean result = taskService.deleteTask(999L);
+
+        assertFalse(result);
+    }
+
 }
