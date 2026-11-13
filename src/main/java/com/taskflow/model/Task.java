@@ -5,16 +5,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Task {
+
     private String id;
     private String title;
     private String description;
     private Priority priority;
-    private TaskStatus status;
     private LocalDateTime dueDate;
+    private TaskStatus status;
     private LocalDateTime createdAt;
     private List<TaskStatusHistory> history = new ArrayList<>();
 
     public Task() {
+    }
+
+    public Task(String id, String title, String description,
+                Priority priority, LocalDateTime dueDate,
+                TaskStatus status, LocalDateTime createdAt) {
+
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.priority = priority;
+        this.dueDate = dueDate;
+        this.status = status;
+        this.createdAt = createdAt;
     }
 
     public String getId() {
@@ -49,20 +63,20 @@ public class Task {
         this.priority = priority;
     }
 
-    public TaskStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(TaskStatus status) {
-        this.status = status;
-    }
-
     public LocalDateTime getDueDate() {
         return dueDate;
     }
 
     public void setDueDate(LocalDateTime dueDate) {
         this.dueDate = dueDate;
+    }
+
+    public TaskStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TaskStatus status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreatedAt() {
