@@ -1,14 +1,10 @@
-
 package com.taskflow.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.taskflow.db.DatabaseManager;
 import com.taskflow.db.SqliteTaskRepository;
-import com.taskflow.dto.CreateTaskRequest;
-import com.taskflow.model.TaskStatus;
 import com.taskflow.service.TaskService;
-import com.taskflow.validation.TaskValidator;
 import io.javalin.Javalin;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,114 +47,8 @@ class TaskApiTest {
         // Create the service using the repository.
         TaskService taskService = new TaskService(repository);
 
-        // Create and configure the Javalin application.
-        app = Javalin.create(config -> {
-
-            // Handle invalid input and return HTTP 400.
-            config.routes.exception(IllegalArgumentException.class,
-                    (e, ctx) -> {
-                        ctx.status(400);
-                        ctx.json(java.util.Map.of(
-                                "error", e.getMessage()
-                        ));
-                    });
-
-            // Get all tasks.
-            config.routes.get("/api/tasks", ctx -> {
-                ctx.json(taskService.getAllTasks());
-            });
-
-            // Get task statistics.
-            config.routes.get("/api/tasks/stats", ctx -> {
-                ctx.json(taskService.getTaskStats());
-            });
-
-            // Get a task by its ID.
-            config.routes.get("/api/tasks/{id}", ctx -> {
-
-                String id = ctx.pathParam("id");
-
-                var task = taskService.getTaskById(id);
-
-                if (task.isPresent()) {
-                    ctx.json(task.get());
-                } else {
-                    ctx.status(404);
-                    ctx.json(java.util.Map.of(
-                            "error", "Task not found."
-                    ));
-                }
-            });
-
-            // Create a new task.
-            config.routes.post("/api/tasks", ctx -> {
-
-                CreateTaskRequest request =
-                        ctx.bodyAsClass(CreateTaskRequest.class);
-
-                TaskValidator.validate(request);
-
-                var task = taskService.createTask(
-                        request.getTitle(),
-                        request.getDescription(),
-                        request.getPriority(),
-                        request.getDueDate()
-                );
-
-                ctx.status(201);
-                ctx.json(task);
-            });
-
-            // Update an existing task.
-            config.routes.put("/api/tasks/{id}", ctx -> {
-
-                String id = ctx.pathParam("id");
-
-                CreateTaskRequest request =
-                        ctx.bodyAsClass(CreateTaskRequest.class);
-
-                TaskValidator.validate(request);
-
-                TaskStatus status = request.getStatus() != null
-                        ? request.getStatus()
-                        : TaskStatus.OFFEN;
-
-                var updatedTask = taskService.updateTask(
-                        id,
-                        request.getTitle(),
-                        request.getDescription(),
-                        request.getPriority(),
-                        request.getDueDate(),
-                        status
-                );
-
-                if (updatedTask.isPresent()) {
-                    ctx.json(updatedTask.get());
-                } else {
-                    ctx.status(404);
-                    ctx.json(java.util.Map.of(
-                            "error", "Task not found."
-                    ));
-                }
-            });
-
-            // Delete a task by its ID.
-            config.routes.delete("/api/tasks/{id}", ctx -> {
-
-                String id = ctx.pathParam("id");
-
-                boolean deleted = taskService.deleteTask(id);
-
-                if (deleted) {
-                    ctx.status(204);
-                } else {
-                    ctx.status(404);
-                    ctx.json(java.util.Map.of(
-                            "error", "Task not found."
-                    ));
-                }
-            });
-        });
+        // Create the Javalin application using TaskApp.
+        app = TaskApp.createApp(taskService, tempDir.resolve("backups"));
 
         // Start the server on a random available port.
         app.start(0);
@@ -181,6 +71,24 @@ class TaskApiTest {
     private String extractTaskId(String responseBody) throws Exception {
         JsonNode json = objectMapper.readTree(responseBody);
         return json.get("id").asText();
+    }
+
+    // Test whether GET / returns the welcome text.
+    @Test
+    void shouldReturnWelcomeMessage() throws Exception {
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/"))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = client.send(
+                request,
+                HttpResponse.BodyHandlers.ofString()
+        );
+
+        assertEquals(200, response.statusCode());
+        assertEquals("Willkommen bei TaskFlow!", response.body());
     }
 
     // Test whether GET returns an empty task list initially.
@@ -232,6 +140,69 @@ class TaskApiTest {
 
         assertNotNull(id);
         assertDoesNotThrow(() -> UUID.fromString(id));
+
+        HttpRequest getRequest = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/tasks/" + id))
+                .GET()
+                .build();
+
+        HttpResponse<String> getResponse = client.send(
+                getRequest,
+                HttpResponse.BodyHandlers.ofString()
+        );
+
+        assertEquals(200, getResponse.statusCode());
+        assertTrue(getResponse.body().contains("Test Task"));
+    }
+
+    // Test whether GET /api/tasks supports query filters and rejects invalid filter values.
+    @Test
+    void shouldFilterTasksAndRejectInvalidFilterParams() throws Exception {
+
+        String json = """
+                {
+                    "title": "Important Report",
+                    "description": "Prepare slides",
+                    "priority": "HOCH"
+                }
+                """;
+
+        HttpRequest createRequest = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/tasks"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+
+        client.send(createRequest, HttpResponse.BodyHandlers.ofString());
+
+        HttpRequest filterRequest = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/tasks?status=OFFEN&priority=HOCH&keyword=Report&dueFilter=TODAY"))
+                .GET()
+                .build();
+
+        HttpResponse<String> filterResponse = client.send(
+                filterRequest,
+                HttpResponse.BodyHandlers.ofString()
+        );
+        assertEquals(200, filterResponse.statusCode());
+
+        HttpRequest badStatusReq = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/tasks?status=UNGUELTIG"))
+                .GET()
+                .build();
+        assertEquals(400, client.send(badStatusReq, HttpResponse.BodyHandlers.ofString()).statusCode());
+
+        HttpRequest badPriorityReq = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/tasks?priority=UNGUELTIG"))
+                .GET()
+                .build();
+        assertEquals(400, client.send(badPriorityReq, HttpResponse.BodyHandlers.ofString()).statusCode());
+
+        HttpRequest badDueReq = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/tasks?dueFilter=UNGUELTIG"))
+                .GET()
+                .build();
+        assertEquals(400, client.send(badDueReq, HttpResponse.BodyHandlers.ofString()).statusCode());
     }
 
     // Test whether invalid task data returns HTTP 400.
@@ -331,6 +302,13 @@ class TaskApiTest {
         assertEquals(200, response.statusCode());
         assertTrue(response.body().contains("Updated Task"));
         assertTrue(response.body().contains("IN_BEARBEITUNG"));
+
+        HttpRequest notFoundPut = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/tasks/" + UUID.randomUUID()))
+                .header("Content-Type", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(updateJson))
+                .build();
+        assertEquals(404, client.send(notFoundPut, HttpResponse.BodyHandlers.ofString()).statusCode());
     }
 
     // Test whether DELETE removes a task successfully.
@@ -405,7 +383,7 @@ class TaskApiTest {
         assertTrue(response.body().contains("Task not found."));
     }
 
-    // Test whether GET returns correct task statistics.
+    // Test whether GET returns correct task statistics including overdue count.
     @Test
     void shouldReturnTaskStatistics() throws Exception {
 
@@ -441,5 +419,24 @@ class TaskApiTest {
         assertEquals(200, response.statusCode());
         assertTrue(response.body().contains("\"total\":1"));
         assertTrue(response.body().contains("\"OFFEN\":1"));
+        assertTrue(response.body().contains("\"overdue\":0"));
+    }
+
+    // Test whether POST /api/tasks/backup creates a JSON backup file.
+    @Test
+    void shouldCreateJsonBackupViaApi() throws Exception {
+
+        HttpRequest backupRequest = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/tasks/backup"))
+                .POST(HttpRequest.BodyPublishers.noBody())
+                .build();
+
+        HttpResponse<String> response = client.send(
+                backupRequest,
+                HttpResponse.BodyHandlers.ofString()
+        );
+
+        assertEquals(201, response.statusCode());
+        assertTrue(response.body().contains("taskflow_backup_"));
     }
 }
