@@ -1,4 +1,3 @@
-
 package com.taskflow.service;
 
 import com.taskflow.db.TaskRepository;
@@ -7,7 +6,8 @@ import com.taskflow.model.Task;
 import com.taskflow.model.TaskFilterCriteria;
 import com.taskflow.model.TaskStatistics;
 import com.taskflow.model.TaskStatus;
-import com.taskflow.model.TaskFilterCriteria;
+
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -92,7 +92,16 @@ public class TaskService {
                 "IN_BEARBEITUNG", stats.getCountByStatus()
                         .getOrDefault(TaskStatus.IN_BEARBEITUNG, 0L),
                 "ABGESCHLOSSEN", stats.getCountByStatus()
-                        .getOrDefault(TaskStatus.ABGESCHLOSSEN, 0L)
+                        .getOrDefault(TaskStatus.ABGESCHLOSSEN, 0L),
+                "overdue", stats.getOverdueCount()
         );
+    }
+
+    public Path exportBackup(Path directory) {
+        return taskRepository.exportBackupToJson(directory);
+    }
+
+    public void restoreBackup(Path backupFile) {
+        taskRepository.restoreFromJson(backupFile);
     }
 }

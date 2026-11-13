@@ -143,11 +143,11 @@ public class SqliteTaskRepository implements TaskRepository {
                 params.add(pattern);
             }
             if (criteria.getDueFilter() != null) {
-                LocalDateTime now = LocalDateTime.now();
                 switch (criteria.getDueFilter()) {
                     case OVERDUE -> {
+                        LocalDate today = LocalDate.now();
                         sql.append(" AND due_date IS NOT NULL AND due_date < ? AND status != 'ABGESCHLOSSEN'");
-                        params.add(now.toString());
+                        params.add(today.atStartOfDay().toString());
                     }
                     case TODAY -> {
                         LocalDate today = LocalDate.now();
@@ -296,7 +296,7 @@ public class SqliteTaskRepository implements TaskRepository {
             stats.setTotalCount(total);
 
             try (PreparedStatement stmt = conn.prepareStatement(overdueCountSql)) {
-                stmt.setString(1, LocalDateTime.now().toString());
+                stmt.setString(1, LocalDate.now().atStartOfDay().toString());
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         stats.setOverdueCount(rs.getLong("cnt"));

@@ -97,6 +97,11 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.11</version>
+                <configuration>
+                    <includes>
+                        <include>com/taskflow/**</include>
+                    </includes>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
