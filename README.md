@@ -6,14 +6,15 @@ Wir entwickeln TaskFlow als Webanwendung für die Lehrveranstaltung Software Qua
 
 ## Unser aktueller Stand
 
-Wir haben das Grundgerüst mit Java, Maven und Javalin eingerichtet. Die Anwendung startet und zwei Beispielrouten funktionieren. Aufgabenverwaltung, SQLite-Datenbank und Browseroberfläche bauen wir als Nächstes ein.
+Datenbank (SQLite), Aufgabenlogik (`TaskService`), Eingabeprüfung (`TaskValidator`), JSON-Backup und die REST-API mit Javalin sind eingebaut und mit automatisierten Tests (JUnit 5, Mockito und JaCoCo) geprüft. Als Nächstes bauen wir die Browseroberfläche unter `src/main/resources/public/` weiter aus.
 
 - [Unsere Qualitätsplanung](docs/Qualitaetsplan.md)
 - [Unser Fortschritt vom 27.10.2026](docs/Fortschritt_2026-10-27.md)
+- [Unser Walkthrough und Fortschritt vom 13.11.2026](docs/Fortschritt_2026-11-13.md)
 
 ## Projekt starten
 
-Wir brauchen ein JDK ab Version 17, Maven 3.9.x und Git. In VS Code öffnen wir den Ordner mit der pom.xml und warten, bis VS Code das Maven-Projekt geladen hat.
+Wir brauchen ein JDK ab Version 17, Maven 3.9.x und Git. In VS Code öffnen wir den Ordner mit der `pom.xml` und warten, bis VS Code das Maven-Projekt geladen hat.
 
 Mit `java -version` und `mvn -version` prüfen wir die installierten Versionen. Danach starten wir im Projektordner:
 
@@ -22,48 +23,44 @@ mvn clean compile
 mvn compile exec:java
 ```
 
-Die Anwendung läuft unter http://localhost:7070/. Mit Ctrl+C im Terminal stoppen wir sie wieder.
+Die Anwendung läuft unter `http://localhost:7070/`. Mit `Ctrl+C` im Terminal stoppen wir sie wieder.
 
-| Route | Was kommt zurück? |
+## Verfügbare Routen (REST-API)
+
+| Methode & Route | Beschreibung |
 |---|---|
-| GET / | HTTP 200 und „Willkommen bei TaskFlow!“ |
-| GET /api/tasks | HTTP 200 und „Hier werden die Aufgaben angezeigt.“ |
+| `GET /` | Begrüßungstext („Willkommen bei TaskFlow!“) |
+| `GET /ui/` | Statische Dateien für die Browseroberfläche (`src/main/resources/public/`) |
+| `GET /api/tasks` | Alle Aufgaben als JSON abrufen (optional mit `?status=`, `?priority=`, `?dueFilter=`, `?keyword=`) |
+| `GET /api/tasks/{id}` | Einzelne Aufgabe inkl. Status-Historie abrufen |
+| `POST /api/tasks` | Neue Aufgabe erstellen (JSON-Body mit `title`, `description`, `priority`, `dueDate`) |
+| `PUT /api/tasks/{id}` | Bestehende Aufgabe aktualisieren |
+| `DELETE /api/tasks/{id}` | Aufgabe löschen |
+| `GET /api/tasks/stats` | Statistik (Gesamtanzahl, Anzahl pro Status und überfällige Aufgaben) |
+| `POST /api/tasks/backup` | Aktuelle Datenbasis als JSON-Datei mit Zeitstempel im Ordner `backups/` sichern |
 
-Die Aufgabenroute gibt aktuell nur einen Beispieltext zurück. Später kommt hier JSON mit den Aufgaben zurück.
+## Tests und Testabdeckung ausführen
 
-## Was wir bisher geprüft haben
-
-Bei laufender Anwendung rufen wir die beiden Routen in einem zweiten Terminal auf:
+Mit folgendem Befehl führen wir alle Unit-, Repository-, Mockito- und API-Tests aus und erzeugen den JaCoCo-Bericht:
 
 ```sh
-curl -i http://localhost:7070/
-curl -i http://localhost:7070/api/tasks
+mvn test
 ```
 
-Beide Aufrufe haben HTTP 200 und die erwarteten Texte geliefert. Damit haben wir den Start und die Beispielrouten geprüft. Automatische Tests für die Aufgabenverwaltung fehlen noch.
+Der Coverage-Bericht liegt danach unter `target/site/jacoco/index.html`. Aktuell erreichen wir über **90 % Testabdeckung** (Vorgabe: mindestens 80 % für die Geschäftslogik).
 
-Bei „Address already in use“ läuft meistens noch eine Instanz. Wir stoppen sie im zugehörigen Terminal mit Ctrl+C. Bei Fehlern mit Paketen oder Imports prüfen wir, ob wir den richtigen Projektordner geöffnet haben und VS Code das Maven-Projekt geladen hat.
+## Projekt- und Paketstruktur
 
-Unter neueren JDK-Versionen zeigt Maven ein paar Warnungen an. Mit JDK 21 lief der Build problemlos durch und erzeugte Code für Java 17.
-
-## Wo liegt was?
-
-| Datei / Ordner | Inhalt |
+| Pfad / Package | Inhalt |
 |---|---|
-| src/main/java/com/taskflow/Main.java | Hier starten wir die Anwendung und legen die Beispielrouten an. |
-| pom.xml | Hier stehen Java-Zielversion 17, Abhängigkeiten und die Einstellungen zum Kompilieren und Starten. |
-| .vscode/settings.json | Damit aktualisiert VS Code die Maven-Einstellungen automatisch. |
-| docs/ | Hier sammeln wir Qualitätsplan und Fortschrittsbericht. |
-| target/ | Hier legt Maven erzeugte Dateien ab. Wir schließen den Ordner über .gitignore aus. |
-
-## Wie wir weiterarbeiten
-
-Wir trennen die HTTP-Routen, die Aufgabenlogik und den Datenzugriff, damit wir die Teile einzeln testen können. Wir planen SQLite für die Speicherung, Jackson für JSON und JUnit 5 mit Mockito für die Tests. Mit JaCoCo messen wir später die Testabdeckung. Für die Abgabe brauchen wir mindestens 80 Prozent, keine bekannten kritischen Fehler und eine verständliche Anleitung.
-
-Im Qualitätsplan beschreiben wir fünf Ziele und unsere geplanten Tests. Für den ersten Geschwindigkeitstest nutzen wir 10.000 Aufgaben. Die Vorgabe von 100.000 Aufgaben bleibt offen, bis wir auch diese Datenmenge geprüft haben. Die Stabilität prüfen wir zunächst lokal über 60 Minuten. Daraus können wir noch keine Verfügbarkeit über einen ganzen Monat ableiten.
-
-## Repository und Team
-
-Wir arbeiten aktuell im bestehenden [GitHub-Repo](https://github.com/Juma2016/TaskFlow) weiter. Wir klären noch ab, ob wir für die Abgabe auf GitLab wechseln müssen.
-
-Die nächsten Aufgaben verteilen wir gemeinsam im Team.
+| `src/main/java/com/taskflow/Main.java` | Startpunkt der Anwendung (initialisiert DB, Service und startet Javalin auf Port 7070). |
+| `src/main/java/com/taskflow/api/TaskApp.java` | Konfiguration der Javalin-App, REST-Routen, Fehlerbehandlung und Static-Files. |
+| `src/main/java/com/taskflow/service/TaskService.java` | Geschäftslogik für Aufgaben, Filterung, Statistik und Backup. |
+| `src/main/java/com/taskflow/validation/TaskValidator.java` | Prüfung der Pflichtfelder (`title`, `priority`). |
+| `src/main/java/com/taskflow/dto/CreateTaskRequest.java` | Request-Objekt für das Erstellen und Aktualisieren von Aufgaben. |
+| `src/main/java/com/taskflow/db/` | `DatabaseManager`, `TaskRepository` und `SqliteTaskRepository` für den SQLite-Datenzugriff und JSON-Backups. |
+| `src/main/java/com/taskflow/model/` | Datenmodelle (`Task`, `Priority`, `TaskStatus`, `TaskStatusHistory`, `TaskFilterCriteria`, `TaskStatistics`). |
+| `src/main/resources/schema.sql` | SQLite-Tabellen (`tasks`, `task_status_history`) und Indizes. |
+| `src/main/resources/public/` | Ordner für die Web-Oberfläche (HTML/CSS/JS). |
+| `src/test/java/com/taskflow/` | Automatisierte Tests (`TaskApiTest`, `TaskServiceTest`, `TaskServiceMockitoTest`, `TaskValidatorTest`, `SqliteTaskRepositoryTest`). |
+| `docs/` | Qualitätsplan und Fortschrittsberichte. |
