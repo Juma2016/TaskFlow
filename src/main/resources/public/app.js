@@ -19,6 +19,7 @@ const deleteForm = byId("delete-form");
 
 let listRequest;
 let statsRequest;
+let deadlinesRequest;
 let detailRequest;
 let searchTimer;
 let editingId;
@@ -182,8 +183,57 @@ async function loadStats() {
   }
 }
 
+function renderDeadlineGroup(key, tasks, badgeClass) {
+  const group = byId("deadline-" + key);
+  const rows = document.createDocumentFragment();
+  for (const task of tasks) {
+    const row = element("li", "deadline-row");
+    const summary = element("div", "deadline-summary");
+    summary.append(
+      element("strong", "", task.title),
+      element("span", "badge " + badgeClass, formatDate(task.dueDate))
+    );
+    row.append(summary, taskButton("Details", task, openDetails));
+    rows.append(row);
+  }
+  group.replaceChildren(rows);
+  group.hidden = tasks.length === 0;
+  byId("deadline-" + key + "-empty").hidden = tasks.length > 0;
+}
+
+async function loadDeadlines() {
+  deadlinesRequest?.abort();
+  const request = new AbortController();
+  deadlinesRequest = request;
+  const feedback = byId("deadlines-feedback");
+  const content = byId("deadlines-content");
+  const retry = byId("deadlines-retry");
+  content.hidden = true;
+  retry.hidden = true;
+  showMessage(feedback, "Fristen werden geladen …");
+
+  try {
+    // Use the same date boundaries as the server-side filters and statistics.
+    const [overdue, today] = await Promise.all(
+      ["OVERDUE", "TODAY"].map((dueFilter) =>
+        api.list(new URLSearchParams({ dueFilter }), request.signal)
+      )
+    );
+    if (request.signal.aborted) return;
+    renderDeadlineGroup("overdue", overdue, "past-due");
+    renderDeadlineGroup("today", today.filter((task) => task.status !== "ABGESCHLOSSEN"), "due-soon");
+    showMessage(feedback);
+    content.hidden = false;
+  } catch {
+    if (!request.signal.aborted) {
+      showMessage(feedback, "Die Fristen konnten nicht geladen werden.");
+      retry.hidden = false;
+    }
+  }
+}
+
 function refresh() {
-  return Promise.all([loadTasks(), loadStats()]);
+  return Promise.all([loadTasks(), loadStats(), loadDeadlines()]);
 }
 
 function openEditor(task = null) {
@@ -355,6 +405,7 @@ filters.addEventListener("change", (event) => {
 filters.addEventListener("reset", () => setTimeout(loadTasks, 0));
 byId("new-task").addEventListener("click", () => openEditor());
 byId("retry").addEventListener("click", refresh);
+byId("retry-deadlines").addEventListener("click", loadDeadlines);
 titleInput.addEventListener("input", () => titleInput.setCustomValidity(""));
 details.addEventListener("close", () => detailRequest?.abort());
 

@@ -50,6 +50,28 @@
       <p id="action-error" class="notice error" role="alert" hidden></p>
     </div>
 
+    <section class="workspace deadline-panel" aria-labelledby="deadline-heading">
+      <div class="workspace-heading">
+        <h2 id="deadline-heading">Heute fällig und überfällig</h2>
+      </div>
+      <p id="deadlines-feedback" class="deadline-feedback" role="status">Fristen werden geladen …</p>
+      <div id="deadlines-retry" class="deadline-feedback" hidden>
+        <button id="retry-deadlines" class="button secondary" type="button">Fristen erneut laden</button>
+      </div>
+      <div id="deadlines-content" class="deadline-grid" hidden>
+        <div class="deadline-group" aria-labelledby="deadline-overdue-heading">
+          <h3 id="deadline-overdue-heading"><span class="dot overdue" aria-hidden="true"></span>Überfällig</h3>
+          <p id="deadline-overdue-empty" class="muted">Keine überfälligen Aufgaben.</p>
+          <ul id="deadline-overdue" class="deadline-list" hidden></ul>
+        </div>
+        <div class="deadline-group" aria-labelledby="deadline-today-heading">
+          <h3 id="deadline-today-heading"><span class="dot progress" aria-hidden="true"></span>Heute fällig</h3>
+          <p id="deadline-today-empty" class="muted">Heute sind keine offenen Aufgaben fällig.</p>
+          <ul id="deadline-today" class="deadline-list" hidden></ul>
+        </div>
+      </div>
+    </section>
+
     <section class="workspace" aria-labelledby="list-heading">
       <div class="workspace-heading">
         <h2 id="list-heading" tabindex="-1">Aufgabenliste</h2>

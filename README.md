@@ -30,6 +30,7 @@ Die Weboberfläche ist unter [http://localhost:7070/ui/](http://localhost:7070/u
 - Über **Neue Aufgabe** legen wir eine Aufgabe an. Titel und Priorität sind Pflichtfelder. Neue Aufgaben beginnen im Status **Offen**.
 - Über **Bearbeiten** können wir auch den Status ändern. **Details** zeigt unter anderem die ID, die Erstellungszeit und den Statusverlauf.
 - Die Suche berücksichtigt Titel und Beschreibung. Status, Priorität und Fälligkeit lassen sich kombinieren. Die Statistik oben zeigt immer alle Aufgaben, unabhängig von den Filtern.
+- Unter **Heute fällig und überfällig** sehen wir direkt beim Öffnen der Seite alle noch nicht abgeschlossenen Aufgaben, die heute fällig oder überfällig sind. Die Filter der Aufgabenliste ändern diese Übersicht nicht.
 - Beim **Löschen** fragt die Anwendung zuerst nach einer Bestätigung.
 - **Backup erstellen** schreibt eine JSON-Datei in den Ordner `backups/` auf dem Server. Die Oberfläche zeigt den Dateinamen an und startet keinen Download.
 
