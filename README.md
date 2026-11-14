@@ -6,7 +6,7 @@ Wir entwickeln TaskFlow als Webanwendung für die Lehrveranstaltung Software Qua
 
 ## Unser aktueller Stand
 
-Datenbank (SQLite), Aufgabenlogik (`TaskService`), Eingabeprüfung (`TaskValidator`), JSON-Backup und die REST-API mit Javalin sind eingebaut und mit automatisierten Tests (JUnit 5, Mockito und JaCoCo) geprüft. Als Nächstes bauen wir die Browseroberfläche unter `src/main/resources/public/` weiter aus.
+Datenbank (SQLite), Aufgabenlogik (`TaskService`), Eingabeprüfung (`TaskValidator`), JSON-Backup und die REST-API mit Javalin sind eingebaut und mit automatisierten Tests (JUnit 5, Mockito und JaCoCo) geprüft. Die Browseroberfläche unter `src/main/resources/public/` nutzt die REST-API direkt und benötigt keine zusätzlichen Frontend-Abhängigkeiten.
 
 - [Unsere Qualitätsplanung](docs/Qualitaetsplan.md)
 - [Unser Fortschritt vom 27.10.2026](docs/Fortschritt_2026-10-27.md)
@@ -23,7 +23,15 @@ mvn clean compile
 mvn compile exec:java
 ```
 
-Die Anwendung läuft unter `http://localhost:7070/`. Mit `Ctrl+C` im Terminal stoppen wir sie wieder.
+Die Weboberfläche ist unter [http://localhost:7070/ui/](http://localhost:7070/ui/) erreichbar. Mit `Ctrl+C` im Terminal stoppen wir die Anwendung.
+
+## Aufgaben in der Weboberfläche verwalten
+
+- Über **Neue Aufgabe** legen wir eine Aufgabe an. Titel und Priorität sind Pflichtfelder. Neue Aufgaben beginnen im Status **Offen**.
+- Über **Bearbeiten** können wir auch den Status ändern. **Details** zeigt unter anderem die ID, die Erstellungszeit und den Statusverlauf.
+- Die Suche berücksichtigt Titel und Beschreibung. Status, Priorität und Fälligkeit lassen sich kombinieren. Die Statistik oben zeigt immer alle Aufgaben, unabhängig von den Filtern.
+- Beim **Löschen** fragt die Anwendung zuerst nach einer Bestätigung.
+- **Backup erstellen** schreibt eine JSON-Datei in den Ordner `backups/` auf dem Server. Die Oberfläche zeigt den Dateinamen an und startet keinen Download.
 
 ## Verfügbare Routen (REST-API)
 
